@@ -183,6 +183,9 @@ type UiToast = {
 }
 
 const PRACTICE_PAGE_SIZE = 200
+const INTERVIEW_DURATION_SECONDS = 30 * 60
+const DEMO_TIMER_REAL_DURATION_SECONDS = 20
+const DEMO_TIMER_SPEED = INTERVIEW_DURATION_SECONDS / DEMO_TIMER_REAL_DURATION_SECONDS
 
 const SKILLS = [
   'React',
@@ -713,7 +716,9 @@ function Dashboard() {
   const [hiredQuestions, setHiredQuestions] = useState<HiredQuestion[]>([])
   const [hiredQuestionVerified, setHiredQuestionVerified] = useState<Record<string, boolean>>({})
   const [hiredQuestionSessionStartedAt, setHiredQuestionSessionStartedAt] = useState<number | null>(null)
-  const [hiredQuestionSecondsLeft, setHiredQuestionSecondsLeft] = useState(30 * 60)
+  const [hiredQuestionSecondsLeft, setHiredQuestionSecondsLeft] = useState(
+    INTERVIEW_DURATION_SECONDS,
+  )
   const [hiredProfileError, setHiredProfileError] = useState<string | null>(null)
   const [hiredIntroNote, setHiredIntroNote] = useState('')
   const [animatedPracticePoints, setAnimatedPracticePoints] = useState(0)
@@ -731,7 +736,7 @@ function Dashboard() {
   const [interviewLoading, setInterviewLoading] = useState(false)
   const [interviewError, setInterviewError] = useState<string | null>(null)
   const [sessionStartedAt, setSessionStartedAt] = useState<number | null>(null)
-  const [secondsLeft, setSecondsLeft] = useState(30 * 60)
+  const [secondsLeft, setSecondsLeft] = useState(INTERVIEW_DURATION_SECONDS)
   const [verifiedPrLinks, setVerifiedPrLinks] = useState<Record<number, string>>({})
   const [verifiedIssueIds, setVerifiedIssueIds] = useState<number[]>([])
   const [verifyingIssueId, setVerifyingIssueId] = useState<number | null>(null)
@@ -1012,7 +1017,8 @@ function Dashboard() {
 
     const interval = window.setInterval(() => {
       const elapsed = Math.floor((Date.now() - sessionStartedAt) / 1000)
-      const remaining = Math.max(0, 30 * 60 - elapsed)
+      const acceleratedElapsed = Math.floor(elapsed * DEMO_TIMER_SPEED)
+      const remaining = Math.max(0, INTERVIEW_DURATION_SECONDS - acceleratedElapsed)
       setSecondsLeft(remaining)
       if (remaining === 0) {
         window.clearInterval(interval)
@@ -1027,7 +1033,8 @@ function Dashboard() {
 
     const interval = window.setInterval(() => {
       const elapsed = Math.floor((Date.now() - hiredQuestionSessionStartedAt) / 1000)
-      const remaining = Math.max(0, 30 * 60 - elapsed)
+      const acceleratedElapsed = Math.floor(elapsed * DEMO_TIMER_SPEED)
+      const remaining = Math.max(0, INTERVIEW_DURATION_SECONDS - acceleratedElapsed)
       setHiredQuestionSecondsLeft(remaining)
       if (remaining === 0) window.clearInterval(interval)
     }, 1000)
@@ -1893,7 +1900,7 @@ function Dashboard() {
       )
       setHiredQuestionVerified({})
       setHiredQuestionSessionStartedAt(Date.now())
-      setHiredQuestionSecondsLeft(30 * 60)
+      setHiredQuestionSecondsLeft(INTERVIEW_DURATION_SECONDS)
       setHiredStep('questions')
     } catch (questionError) {
       setHiredProfileError(
@@ -1972,7 +1979,7 @@ function Dashboard() {
       setInterviewIssues(picked)
       setInterviewView('session')
       setSessionStartedAt(Date.now())
-      setSecondsLeft(30 * 60)
+      setSecondsLeft(INTERVIEW_DURATION_SECONDS)
       setVerifiedIssueIds([])
       setVerifiedPrLinks({})
     } catch (sessionError) {
@@ -2682,7 +2689,7 @@ function Dashboard() {
                           setVerifiedIssueIds([])
                           setVerifiedPrLinks({})
                           setSessionStartedAt(null)
-                          setSecondsLeft(30 * 60)
+                          setSecondsLeft(INTERVIEW_DURATION_SECONDS)
                         }}
                       >
                         Start Another Interview
