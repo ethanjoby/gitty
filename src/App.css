@@ -267,26 +267,26 @@
   margin: 0 0 18px;
 }
 
-.hero-left h1 span {
-  font-style: italic;
-  color: #ffffff;
-}
-
 .hero-highlight-wrap {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: 10px;
+  margin-top: 0;
+  margin-left: 10px;
 }
 
 .hero-highlight {
   display: inline-block;
-  background: linear-gradient(120deg, #ff7a59, #ff4d6d, #ffc857, #ff7a59);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: gradient-shift 6s ease infinite;
+  color: #ffffff;
+  font-style: italic;
+  font-weight: 700;
+}
+
+.hero-title-lite {
+  display: inline;
+  font-weight: 400;
+  font-style: normal;
+  color: #ffffff;
 }
 
 .eyebrow {

@@ -22,8 +22,6 @@ function App() {
   const [currentLine, setCurrentLine] = useState('')
   const [isDone, setIsDone] = useState(false)
   const terminalRef = useRef<HTMLDivElement | null>(null)
-  const [interviewText, setInterviewText] = useState('')
-  const [howMode, setHowMode] = useState<'engineers' | 'companies'>('engineers')
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -110,40 +108,6 @@ function App() {
     }
   }, [])
 
-  useEffect(() => {
-    let timeoutId: number | undefined
-    let cancelled = false
-    const word = 'Interview'
-
-    const startTyping = () => {
-      if (cancelled) return
-      setInterviewText('')
-      let index = 0
-
-      const typeNext = () => {
-        if (cancelled) return
-        if (index <= word.length) {
-          setInterviewText(word.slice(0, index))
-          index += 1
-          timeoutId = window.setTimeout(typeNext, 80)
-        } else {
-          timeoutId = window.setTimeout(startTyping, 1400)
-        }
-      }
-
-      typeNext()
-    }
-
-    startTyping()
-
-    return () => {
-      cancelled = true
-      if (timeoutId) {
-        window.clearTimeout(timeoutId)
-      }
-    }
-  }, [])
-
   return (
     <div className="page dark">
       <div className="bg">
@@ -178,9 +142,9 @@ function App() {
           <div className="hero-left" data-animate>
             <p className="eyebrow">Modern hiring, real work.</p>
             <h1>
-              Your Work is Your
+              <span className="hero-title-lite">Your Work is Your</span>
               <span className="hero-highlight-wrap">
-                <span className="hero-highlight">{interviewText}</span>
+                <span className="hero-highlight">Interview</span>
                 <span className="cursor cursor-hero" aria-hidden="true" />
               </span>
             </h1>
@@ -189,8 +153,9 @@ function App() {
               real PRs and building a verified profile.
             </p>
             <div className="hero-actions">
-              <button className="btn btn-primary">Request Early Access</button>
-              <button className="btn btn-ghost">See Demo</button>
+              <button className="btn btn-primary" onClick={handleGetStarted}>
+                Get Started
+              </button>
             </div>
           </div>
 
@@ -236,127 +201,6 @@ function App() {
                 )}
               </div>
             </div>
-          </div>
-        </section>
-
-        <section className="section how" id="how">
-          <div className="section-title how-title" data-animate>
-            <h2 className="glitch glitch-spacing" data-text="LeetCode is dead.">
-              LeetCode is dead.
-            </h2>
-            <p>Two sides of the same platform. Real signal for everyone.</p>
-          </div>
-          <div className="pill-toggle-wrapper" data-animate>
-            <div className="pill-toggle">
-              <button
-                className={howMode === 'engineers' ? 'active' : ''}
-                onClick={() => setHowMode('engineers')}
-              >
-                For Engineers
-              </button>
-              <button
-                className={howMode === 'companies' ? 'active' : ''}
-                onClick={() => setHowMode('companies')}
-              >
-                For Companies
-              </button>
-            </div>
-          </div>
-          <div className="cards how-cards" data-animate>
-            {(
-              howMode === 'engineers'
-                ? [
-                    {
-                      title: 'Pull in a real codebase',
-                      body: 'Work on production repos from real companies. Open source codebases with real issues, real complexity, real context.',
-                    },
-                    {
-                      title: 'Pick an issue',
-                      body: "Choose from real GitHub issues tied to that commit. Bugs, features, actual tasks. The kind of work you'd do on the job.",
-                    },
-                    {
-                      title: 'Submit your PR',
-                      body: 'Ship your solution as a pull request. Your work gets reviewed and scored on code quality, architecture, and test coverage. Every PR builds your verified profile.',
-                    },
-                    {
-                      title: 'Get paid',
-                      body: "Bounties pay out instantly when your PR is submitted, with the rest paid once it's merged. Build your reputation and your bank account at the same time.",
-                    },
-                  ]
-                : [
-                    {
-                      title: 'Submit your codebase',
-                      body: 'Connect your GitHub repo and pick a commit hash. Aryn automatically flattens it into a clean snapshot with no history, no blame, no way for candidates to see how you built it. Your IP stays protected.',
-                    },
-                    {
-                      title: 'Watch candidates work',
-                      body: 'Candidates get dropped into your codebase cold inside a sandboxed environment. No copy-paste out, no cloning. Your code never leaves the platform.',
-                    },
-                    {
-                      title: 'Compare approaches',
-                      body: 'Did they follow the same path you took? Or find a better approach you never considered? The signal is in the work, not the answer.',
-                    },
-                    {
-                      title: 'Hire with confidence',
-                      body: 'Access a ranked database of engineers with verified project history. Filter by skills, challenge performance, and real contributions. Hire people who can ship.',
-                    },
-                  ]
-            ).map((step, index) => (
-              <article key={step.title} className="card">
-                <span className="card-index">{index + 1}</span>
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="section proof" id="compare">
-          <div className="section-title" data-animate>
-            <h2>Real Engineering vs Pattern Memorization</h2>
-          </div>
-          <div className="compare-table compare-table-dark" data-animate>
-            <div className="compare-head compare-head-dark">
-              <span />
-              <span className="compare-gitty">Gitty</span>
-              <span>LeetCode</span>
-            </div>
-            {[
-              {
-                label: 'What you practice on',
-                good: 'Real codebases with history',
-                bad: 'Toy problems in isolation',
-              },
-              {
-                label: 'Evaluation signal',
-                good: 'Actual engineering ability',
-                bad: 'Pattern memorization',
-              },
-              {
-                label: 'Your output',
-                good: 'Production-ready code',
-                bad: 'A correct answer',
-              },
-              {
-                label: 'Signal for hiring',
-                good: 'Can ship in a real repo',
-                bad: 'Can recite algorithms',
-              },
-              {
-                label: 'AI-resistant',
-                good: 'Yes. Real work can’t be faked.',
-                bad: 'No. AI passes patterns fast.',
-              },
-            ].map((row) => (
-              <div key={row.label} className="compare-row compare-row-dark">
-                <span>{row.label}</span>
-                <span className="good compare-gitty">
-                  <span className="check">✓</span>
-                  {row.good}
-                </span>
-                <span className="bad">{row.bad}</span>
-              </div>
-            ))}
           </div>
         </section>
 
