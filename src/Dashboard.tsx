@@ -677,7 +677,7 @@ function Dashboard() {
   const navigate = useNavigate()
   const { tab: routeTab } = useParams<{ tab?: string }>()
   const [user, setUser] = useState<User | null>(auth.currentUser)
-  const [activeTab, setActiveTab] = useState<Tab>('practice')
+  const [activeTab, setActiveTab] = useState<Tab>('profile')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<DashboardData | null>(null)
@@ -769,7 +769,7 @@ function Dashboard() {
       if (activeTab !== routeTab) setActiveTab(routeTab)
       return
     }
-    navigate('/dashboard/practice', { replace: true })
+    navigate('/dashboard/profile', { replace: true })
   }, [routeTab, activeTab, navigate])
 
   const goToTab = (tab: Tab) => {
@@ -1493,6 +1493,11 @@ function Dashboard() {
     const contribNode = contribMapRef.current
     if (!contribNode) return
 
+    const rect = contribNode.getBoundingClientRect()
+    if (rect.top < window.innerHeight * 0.9 && rect.bottom > 0) {
+      setContribVisible(true)
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -1505,7 +1510,7 @@ function Dashboard() {
 
     observer.observe(contribNode)
     return () => observer.disconnect()
-  }, [activeTab])
+  }, [activeTab, data, contributionTargetLevels.length])
 
   useEffect(() => {
     if (!contribVisible || activeTab !== 'profile' || contributionTargetLevels.length === 0) return
