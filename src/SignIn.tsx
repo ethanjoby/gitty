@@ -60,7 +60,9 @@ function SignIn() {
         navigate('/company/dashboard')
         return
       }
-      navigate('/dashboard')
+      const onboardingComplete =
+        localStorage.getItem('gitty.user.onboardingComplete') === 'true'
+      navigate(onboardingComplete ? '/dashboard' : '/onboarding')
     })
 
     return () => unsub()
@@ -81,7 +83,9 @@ function SignIn() {
       }
       localStorage.setItem('gitty.auth.role', 'user')
 
-      navigate('/dashboard')
+      const onboardingComplete =
+        localStorage.getItem('gitty.user.onboardingComplete') === 'true'
+      navigate(onboardingComplete ? '/dashboard' : '/onboarding')
     } catch (error) {
       setAuthError(getAuthErrorMessage(error))
       console.error('Starting GitHub popup sign-in failed:', error)

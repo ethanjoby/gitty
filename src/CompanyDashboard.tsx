@@ -40,11 +40,48 @@ type CompanyApplication = {
   status: 'open' | 'closed'
 }
 
+type CompanyApplicationSubmissionPullRequest = {
+  id: string
+  title: string
+  htmlUrl: string
+  repoFullName: string
+  ownerLogin: string
+  ownerLogoUrl: string
+  createdAt: string
+}
+
+type CompanyApplicationSubmission = {
+  id: string
+  submittedAt: string
+  companyId: string
+  companyName: string
+  companyWebsite: string
+  companyLogoUrl: string
+  applicationId: string | null
+  roleTitle: string
+  interviewTrack: string
+  userLogin: string
+  userName: string
+  userAvatarUrl: string
+  userGithubUrl: string
+  linkedInUrl: string
+  resumeFileName: string
+  resumeFileDataUrl: string
+  introNote: string
+  practicePoints: number
+  bountiesSolved: number
+  bountyPrizesWon: number
+  moneyMadeUsd: number
+  skills: string[]
+  pullRequests: CompanyApplicationSubmissionPullRequest[]
+}
+
 type BountyPosting = {
   id: string
   companyName: string
   companyWebsite: string
   companyLogoUrl: string
+  postedByEmail?: string
   issueTitle: string
   repo: string
   issueUrl: string
@@ -71,6 +108,467 @@ type CompanyAccount = {
   photoURL: string
 }
 
+const CANDIDATE_FIELD_OPTIONS = [
+  'LinkedIn URL',
+  'Resume',
+  'Practice Points',
+  'Bounties Solved',
+  'Money From Bounties',
+  'Skills',
+  'Past PRs',
+] as const
+
+const GITTY_DEMO_EMAIL = 'reachgittyhere@gmail.com'
+const GITTY_DEMO_COMPANY = 'gitty'
+const GITTY_FRONTEND_APPLICATION_ID = 'gitty-frontend-application'
+const GITTY_FRONTEND_ROLE_TITLE = 'Frontend Engineer @ Gitty'
+const GITTY_QUESTION_ISSUES = [
+  {
+    id: 'gitty-q1',
+    issueNumber: 1,
+    issueTitle: 'Improve dashboard state transitions and reduce UI flicker',
+  },
+  {
+    id: 'gitty-q2',
+    issueNumber: 2,
+    issueTitle: 'Fix candidate field picker interactions and keyboard focus',
+  },
+  {
+    id: 'gitty-q3',
+    issueNumber: 3,
+    issueTitle: 'Refine company track cards layout and data hierarchy',
+  },
+] as const
+
+const PAST_PR_REPO_POOL = [
+  'openai/openai-node',
+  'cloudflare/workers-sdk',
+  'google/go-containerregistry',
+  'google/gvisor',
+  'vercel/next.js',
+  'stripe/stripe-node',
+  'elastic/elasticsearch',
+  'facebook/react',
+  'modal-labs/modal-client',
+] as const
+
+const GITTY_HARDCODED_APPLICATION: CompanyApplication = {
+  id: GITTY_FRONTEND_APPLICATION_ID,
+  companyName: 'Gitty',
+  companyWebsite: 'https://gitty.app',
+  companyType: 'B2B',
+  companyLogoUrl: '',
+  roleTitle: GITTY_FRONTEND_ROLE_TITLE,
+  roleDescription: 'Frontend engineer focused on polished product UX and fast iteration.',
+  candidateFields: ['LinkedIn URL', 'Resume', 'Practice Points', 'Skills', 'Past PRs'],
+  customQuestions: ['Share 3 PRs that best represent your frontend decision-making.'],
+  issues: [
+    {
+      id: 'gitty-frontend-issue-1',
+      repo: 'ethanjoby/my-gitty',
+      issueUrl: 'https://github.com/ethanjoby/my-gitty/issues/1',
+      issueTitle: 'Improve dashboard state transitions and reduce UI flicker',
+    },
+  ],
+  timeLimitMinutes: 90,
+  createdAt: '2026-02-01T00:00:00.000Z',
+  responses: 6,
+  status: 'open',
+}
+
+const GITTY_HARDCODED_BOUNTIES: BountyPosting[] = [
+  {
+    id: 'gitty-demo-bounty-1',
+    companyName: 'Gitty',
+    companyWebsite: 'https://gitty.app',
+    companyLogoUrl: '',
+    postedByEmail: GITTY_DEMO_EMAIL,
+    issueTitle: 'Polish profile layout spacing and stat hierarchy',
+    repo: 'ethanjoby/my-gitty',
+    issueUrl: 'https://github.com/ethanjoby/my-gitty/issues/11',
+    priority: 'high',
+    payoutUsd: 75,
+    createdAt: '2026-02-05T12:00:00.000Z',
+    winnerLogin: null,
+    winnerPrUrl: null,
+  },
+  {
+    id: 'gitty-demo-bounty-2',
+    companyName: 'Gitty',
+    companyWebsite: 'https://gitty.app',
+    companyLogoUrl: '',
+    postedByEmail: GITTY_DEMO_EMAIL,
+    issueTitle: 'Improve company applicant cards for faster review',
+    repo: 'ethanjoby/my-gitty',
+    issueUrl: 'https://github.com/ethanjoby/my-gitty/issues/12',
+    priority: 'critical',
+    payoutUsd: 125,
+    createdAt: '2026-02-06T09:20:00.000Z',
+    winnerLogin: 'ethanjoby',
+    winnerPrUrl: 'https://github.com/ethanjoby/my-gitty/pull/6228',
+  },
+  {
+    id: 'gitty-demo-bounty-3',
+    companyName: 'Gitty',
+    companyWebsite: 'https://gitty.app',
+    companyLogoUrl: '',
+    postedByEmail: GITTY_DEMO_EMAIL,
+    issueTitle: 'Refine interview flow timer and score transitions',
+    repo: 'ethanjoby/my-gitty',
+    issueUrl: 'https://github.com/ethanjoby/my-gitty/issues/13',
+    priority: 'medium',
+    payoutUsd: 50,
+    createdAt: '2026-02-07T14:45:00.000Z',
+    winnerLogin: null,
+    winnerPrUrl: null,
+  },
+]
+
+const GITTY_HARDCODED_SUBMISSIONS: CompanyApplicationSubmission[] = [
+  {
+    id: 'gitty-hardcoded-ethan',
+    submittedAt: '2026-02-10T16:30:00.000Z',
+    companyId: 'gitty-hardcoded',
+    companyName: 'Gitty',
+    companyWebsite: 'https://gitty.app',
+    companyLogoUrl: '',
+    applicationId: GITTY_FRONTEND_APPLICATION_ID,
+    roleTitle: GITTY_FRONTEND_ROLE_TITLE,
+    interviewTrack: 'Frontend Engineer',
+    userLogin: 'ethanjoby',
+    userName: 'Ethan Varghese',
+    userAvatarUrl: 'https://github.com/ethanjoby.png',
+    userGithubUrl: 'https://github.com/ethanjoby',
+    linkedInUrl: 'https://www.linkedin.com/in/ethanvarghese/',
+    resumeFileName: 'Ethan-Varghese-Resume.pdf',
+    resumeFileDataUrl: '',
+    introNote: 'I build fast product loops with production-grade reliability.',
+    practicePoints: 12000,
+    bountiesSolved: 57,
+    bountyPrizesWon: 18,
+    moneyMadeUsd: 248500,
+    skills: ['TypeScript', 'React', 'Node.js', 'PostgreSQL', 'System Design'],
+    pullRequests: [
+      {
+        id: 'gitty-pr-ethan-1',
+        title: 'Fix streaming delta merge edge case',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6201',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-01-24T11:15:00.000Z',
+      },
+      {
+        id: 'gitty-pr-ethan-2',
+        title: 'Improve worker retry backoff determinism',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6202',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-01-30T09:10:00.000Z',
+      },
+      {
+        id: 'gitty-pr-ethan-3',
+        title: 'Fix container manifest selection in tarball exports',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6203',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-02-02T12:35:00.000Z',
+      },
+      {
+        id: 'gitty-pr-ethan-4',
+        title: 'Harden DNS bootstrap path on runsc network init',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6204',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-01-19T08:20:00.000Z',
+      },
+      {
+        id: 'gitty-pr-ethan-5',
+        title: 'Reduce idle worker memory spikes in edge runtime',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6205',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-01-12T18:05:00.000Z',
+      },
+      {
+        id: 'gitty-pr-ethan-6',
+        title: 'Improve partial failure handling in batch API client',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6206',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-01-07T14:42:00.000Z',
+      },
+    ],
+  },
+  {
+    id: 'gitty-hardcoded-sarah',
+    submittedAt: '2026-02-09T14:20:00.000Z',
+    companyId: 'gitty-hardcoded',
+    companyName: 'Gitty',
+    companyWebsite: 'https://gitty.app',
+    companyLogoUrl: '',
+    applicationId: GITTY_FRONTEND_APPLICATION_ID,
+    roleTitle: GITTY_FRONTEND_ROLE_TITLE,
+    interviewTrack: 'Frontend Engineer',
+    userLogin: 'sarahcodes',
+    userName: 'Sarah Kim',
+    userAvatarUrl: logo,
+    userGithubUrl: 'https://github.com/sarahdrasner',
+    linkedInUrl: 'https://www.linkedin.com/in/sarah-kim-dev/',
+    resumeFileName: 'Sarah-Kim-Resume.pdf',
+    resumeFileDataUrl: '',
+    introNote: 'Backend-focused engineer with heavy CI and API reliability ownership.',
+    practicePoints: 9420,
+    bountiesSolved: 33,
+    bountyPrizesWon: 11,
+    moneyMadeUsd: 78250,
+    skills: ['Go', 'Node.js', 'Redis', 'Kubernetes', 'Observability'],
+    pullRequests: [
+      {
+        id: 'gitty-pr-sarah-1',
+        title: 'Stabilize integration tests in CI matrix',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6207',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-02-01T10:00:00.000Z',
+      },
+      {
+        id: 'gitty-pr-sarah-2',
+        title: 'Patch retry idempotency race condition',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6208',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-01-22T13:30:00.000Z',
+      },
+      {
+        id: 'gitty-pr-sarah-3',
+        title: 'Add deterministic fixtures for flaky auth integration tests',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6209',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-02-03T16:18:00.000Z',
+      },
+      {
+        id: 'gitty-pr-sarah-4',
+        title: 'Stabilize webhook retries under duplicate delivery conditions',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6210',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-01-28T10:42:00.000Z',
+      },
+      {
+        id: 'gitty-pr-sarah-5',
+        title: 'Improve CI timeout handling for parallelized suites',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6211',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-01-16T11:06:00.000Z',
+      },
+      {
+        id: 'gitty-pr-sarah-6',
+        title: 'Fix edge case in metrics cardinality limiter',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6212',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-01-09T09:55:00.000Z',
+      },
+    ],
+  },
+  {
+    id: 'gitty-hardcoded-jordan',
+    submittedAt: '2026-02-08T13:15:00.000Z',
+    companyId: 'gitty-hardcoded',
+    companyName: 'Gitty',
+    companyWebsite: 'https://gitty.app',
+    companyLogoUrl: '',
+    applicationId: GITTY_FRONTEND_APPLICATION_ID,
+    roleTitle: GITTY_FRONTEND_ROLE_TITLE,
+    interviewTrack: 'Frontend Engineer',
+    userLogin: 'jordandev',
+    userName: 'Jordan Lee',
+    userAvatarUrl: 'https://github.com/vercel.png',
+    userGithubUrl: 'https://github.com/vercel',
+    linkedInUrl: 'https://www.linkedin.com/in/jordan-lee-ui/',
+    resumeFileName: 'Jordan-Lee-Resume.pdf',
+    resumeFileDataUrl: '',
+    introNote: 'Frontend systems + design performance specialist.',
+    practicePoints: 8750,
+    bountiesSolved: 26,
+    bountyPrizesWon: 8,
+    moneyMadeUsd: 42800,
+    skills: ['React', 'TypeScript', 'Next.js', 'Tailwind', 'Accessibility'],
+    pullRequests: [
+      {
+        id: 'gitty-pr-jordan-1',
+        title: 'Reduce hydration mismatch in dynamic profile cards',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6213',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-02-05T09:11:00.000Z',
+      },
+      {
+        id: 'gitty-pr-jordan-2',
+        title: 'Refactor modal focus traps for keyboard navigation',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6214',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-01-27T12:09:00.000Z',
+      },
+      {
+        id: 'gitty-pr-jordan-3',
+        title: 'Improve chart render batching for large datasets',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6215',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-01-18T08:45:00.000Z',
+      },
+    ],
+  },
+  {
+    id: 'gitty-hardcoded-alex',
+    submittedAt: '2026-02-07T18:45:00.000Z',
+    companyId: 'gitty-hardcoded',
+    companyName: 'Gitty',
+    companyWebsite: 'https://gitty.app',
+    companyLogoUrl: '',
+    applicationId: GITTY_FRONTEND_APPLICATION_ID,
+    roleTitle: GITTY_FRONTEND_ROLE_TITLE,
+    interviewTrack: 'Frontend Engineer',
+    userLogin: 'alexbuilds',
+    userName: 'Alex Patel',
+    userAvatarUrl: 'https://github.com/cloudflare.png',
+    userGithubUrl: 'https://github.com/cloudflare',
+    linkedInUrl: 'https://www.linkedin.com/in/alex-patel-fe/',
+    resumeFileName: 'Alex-Patel-Resume.pdf',
+    resumeFileDataUrl: '',
+    introNote: 'UI performance and design-system consistency engineer.',
+    practicePoints: 10140,
+    bountiesSolved: 31,
+    bountyPrizesWon: 12,
+    moneyMadeUsd: 68900,
+    skills: ['React', 'Design Systems', 'Motion', 'Testing', 'Performance'],
+    pullRequests: [
+      {
+        id: 'gitty-pr-alex-1',
+        title: 'Fix tab routing edge-cases with deep links',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6216',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-02-04T16:22:00.000Z',
+      },
+      {
+        id: 'gitty-pr-alex-2',
+        title: 'Improve optimistic state updates in list views',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6217',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-01-25T07:54:00.000Z',
+      },
+      {
+        id: 'gitty-pr-alex-3',
+        title: 'Unify typography scale tokens across dashboard',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6218',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-01-13T14:38:00.000Z',
+      },
+    ],
+  },
+  {
+    id: 'gitty-hardcoded-maya',
+    submittedAt: '2026-02-06T11:05:00.000Z',
+    companyId: 'gitty-hardcoded',
+    companyName: 'Gitty',
+    companyWebsite: 'https://gitty.app',
+    companyLogoUrl: '',
+    applicationId: GITTY_FRONTEND_APPLICATION_ID,
+    roleTitle: GITTY_FRONTEND_ROLE_TITLE,
+    interviewTrack: 'Frontend Engineer',
+    userLogin: 'mayaux',
+    userName: 'Maya Chen',
+    userAvatarUrl: 'https://github.com/openai.png',
+    userGithubUrl: 'https://github.com/openai',
+    linkedInUrl: 'https://www.linkedin.com/in/maya-chen-ui/',
+    resumeFileName: 'Maya-Chen-Resume.pdf',
+    resumeFileDataUrl: '',
+    introNote: 'Product-minded frontend engineer with strong UX delivery.',
+    practicePoints: 9320,
+    bountiesSolved: 24,
+    bountyPrizesWon: 7,
+    moneyMadeUsd: 35100,
+    skills: ['React', 'TypeScript', 'UX', 'Animation', 'Storybook'],
+    pullRequests: [
+      {
+        id: 'gitty-pr-maya-1',
+        title: 'Smooth contribution graph animation timing',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6219',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-02-02T15:17:00.000Z',
+      },
+      {
+        id: 'gitty-pr-maya-2',
+        title: 'Improve focus states for form field picker controls',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6220',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-01-29T10:23:00.000Z',
+      },
+      {
+        id: 'gitty-pr-maya-3',
+        title: 'Fix mobile spacing regressions in profile cards',
+        htmlUrl: 'https://github.com/ethanjoby/my-gitty/pull/6221',
+        repoFullName: 'ethanjoby/my-gitty',
+        ownerLogin: 'ethanjoby',
+        ownerLogoUrl: 'https://github.com/ethanjoby.png',
+        createdAt: '2026-01-14T12:40:00.000Z',
+      },
+    ],
+  },
+]
+
+function readStoredBounties(): BountyPosting[] {
+  const raw = localStorage.getItem('gitty.company.bounties')
+  if (!raw) return []
+  try {
+    const parsed = JSON.parse(raw) as BountyPosting[]
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+function bountyBelongsToCompany(
+  bounty: BountyPosting,
+  profile: CompanyProfile | null,
+  account: CompanyAccount,
+) {
+  const email = account.email.trim().toLowerCase()
+  const companyName = profile?.companyName.trim().toLowerCase() ?? ''
+  if (email && bounty.postedByEmail?.trim().toLowerCase() === email) return true
+  if (companyName && bounty.companyName.trim().toLowerCase() === companyName) return true
+  return false
+}
+
 function normalizeApplication(raw: unknown): CompanyApplication | null {
   if (!raw || typeof raw !== 'object') return null
   const item = raw as Partial<CompanyApplication>
@@ -87,10 +585,54 @@ function normalizeApplication(raw: unknown): CompanyApplication | null {
     customQuestions: Array.isArray(item.customQuestions) ? item.customQuestions : [],
     issues: Array.isArray(item.issues) ? item.issues : [],
     timeLimitMinutes:
-      typeof item.timeLimitMinutes === 'number' ? item.timeLimitMinutes : 90,
+      typeof item.timeLimitMinutes === 'number' ? item.timeLimitMinutes : 30,
     createdAt: item.createdAt,
     responses: typeof item.responses === 'number' ? item.responses : 0,
     status: item.status === 'closed' ? 'closed' : 'open',
+  }
+}
+
+function normalizeApplicationSubmission(raw: unknown): CompanyApplicationSubmission | null {
+  if (!raw || typeof raw !== 'object') return null
+  const item = raw as Partial<CompanyApplicationSubmission>
+  if (!item.id || !item.submittedAt || !item.userLogin || !item.companyName) return null
+
+  const pullRequests = Array.isArray(item.pullRequests)
+    ? item.pullRequests.filter(
+        (pr): pr is CompanyApplicationSubmissionPullRequest =>
+          !!pr &&
+          typeof pr === 'object' &&
+          typeof (pr as CompanyApplicationSubmissionPullRequest).id === 'string' &&
+          typeof (pr as CompanyApplicationSubmissionPullRequest).htmlUrl === 'string',
+      )
+    : []
+
+  return {
+    id: item.id,
+    submittedAt: item.submittedAt,
+    companyId: item.companyId ?? '',
+    companyName: item.companyName,
+    companyWebsite: item.companyWebsite ?? '',
+    companyLogoUrl: item.companyLogoUrl ?? '',
+    applicationId: item.applicationId ?? null,
+    roleTitle: item.roleTitle ?? item.interviewTrack ?? 'Interview Candidate',
+    interviewTrack: item.interviewTrack ?? '',
+    userLogin: item.userLogin,
+    userName: item.userName ?? item.userLogin,
+    userAvatarUrl: item.userAvatarUrl ?? '',
+    userGithubUrl: item.userGithubUrl ?? '',
+    linkedInUrl: item.linkedInUrl ?? '',
+    resumeFileName: item.resumeFileName ?? '',
+    resumeFileDataUrl: item.resumeFileDataUrl ?? '',
+    introNote: item.introNote ?? '',
+    practicePoints: typeof item.practicePoints === 'number' ? item.practicePoints : 0,
+    bountiesSolved: typeof item.bountiesSolved === 'number' ? item.bountiesSolved : 0,
+    bountyPrizesWon: typeof item.bountyPrizesWon === 'number' ? item.bountyPrizesWon : 0,
+    moneyMadeUsd: typeof item.moneyMadeUsd === 'number' ? item.moneyMadeUsd : 0,
+    skills: Array.isArray(item.skills)
+      ? item.skills.filter((skill): skill is string => typeof skill === 'string')
+      : [],
+    pullRequests,
   }
 }
 
@@ -99,17 +641,20 @@ function CompanyDashboard() {
   const [activeTab, setActiveTab] = useState<CompanyTab>('applications')
   const [profile, setProfile] = useState<CompanyProfile | null>(null)
   const [applications, setApplications] = useState<CompanyApplication[]>([])
+  const [applicationSubmissions, setApplicationSubmissions] = useState<
+    CompanyApplicationSubmission[]
+  >([])
   const [bounties, setBounties] = useState<BountyPosting[]>([])
   const [bountySubmissions, setBountySubmissions] = useState<BountySubmission[]>([])
 
   const [appDraft, setAppDraft] = useState({
     roleTitle: '',
     roleDescription: '',
-    timeLimitMinutes: '90',
+    timeLimitMinutes: '30',
   })
   const [candidateFields, setCandidateFields] = useState<string[]>([
     'LinkedIn URL',
-    'Resume URL',
+    'Resume',
   ])
   const [customQuestions, setCustomQuestions] = useState<string[]>([])
   const [issueDraft, setIssueDraft] = useState({
@@ -118,7 +663,6 @@ function CompanyDashboard() {
     issueTitle: '',
   })
   const [issues, setIssues] = useState<ApplicationIssue[]>([])
-  const [fieldInput, setFieldInput] = useState('')
   const [questionInput, setQuestionInput] = useState('')
   const [companyAccount, setCompanyAccount] = useState<CompanyAccount>({
     name: '',
@@ -178,6 +722,8 @@ function CompanyDashboard() {
     const appsRaw = localStorage.getItem('gitty.company.applications')
     const bountiesRaw = localStorage.getItem('gitty.company.bounties')
     const submissionsRaw = localStorage.getItem('gitty.bounty.submissions')
+    const appSubmissionsRaw = localStorage.getItem('gitty.company.application.submissions')
+    let loadedProfile: CompanyProfile | null = null
 
     if (!profileRaw) {
       navigate('/company/onboarding')
@@ -187,6 +733,7 @@ function CompanyDashboard() {
     try {
       const parsedProfile = JSON.parse(profileRaw) as CompanyProfile
       setProfile(parsedProfile)
+      loadedProfile = parsedProfile
     } catch {
       localStorage.removeItem('gitty.company.profile')
       localStorage.removeItem('gitty.company.onboardingComplete')
@@ -211,7 +758,12 @@ function CompanyDashboard() {
     if (bountiesRaw) {
       try {
         const parsed = JSON.parse(bountiesRaw) as BountyPosting[]
-        if (Array.isArray(parsed)) setBounties(parsed)
+        if (Array.isArray(parsed)) {
+          const visible = parsed.filter((bounty) =>
+            bountyBelongsToCompany(bounty, loadedProfile, companyAccount),
+          )
+          setBounties(visible)
+        }
       } catch {
         localStorage.removeItem('gitty.company.bounties')
       }
@@ -224,19 +776,96 @@ function CompanyDashboard() {
         localStorage.removeItem('gitty.bounty.submissions')
       }
     }
-  }, [navigate])
+    if (appSubmissionsRaw) {
+      try {
+        const parsed = JSON.parse(appSubmissionsRaw) as unknown[]
+        if (Array.isArray(parsed)) {
+          const normalized = parsed
+            .map((item) => normalizeApplicationSubmission(item))
+            .filter((item): item is CompanyApplicationSubmission => item !== null)
+          setApplicationSubmissions(normalized)
+          localStorage.setItem(
+            'gitty.company.application.submissions',
+            JSON.stringify(normalized),
+          )
+        }
+      } catch {
+        localStorage.removeItem('gitty.company.application.submissions')
+      }
+    }
+  }, [navigate, companyAccount])
 
   const totalResponses = useMemo(
     () => applications.reduce((sum, item) => sum + item.responses, 0),
     [applications],
   )
+  const scopedApplicationSubmissions = useMemo(() => {
+    if (!profile) return []
+    const companyName = profile.companyName.trim().toLowerCase()
+    return applicationSubmissions.filter((submission) => {
+      const byName = submission.companyName.trim().toLowerCase() === companyName
+      const byApplication = !!submission.applicationId
+        ? applications.some((app) => app.id === submission.applicationId)
+        : false
+      return byName || byApplication
+    })
+  }, [applicationSubmissions, profile, applications])
+  const isGittyHardcodedCompany = useMemo(() => {
+    const emailMatches = companyAccount.email.trim().toLowerCase() === GITTY_DEMO_EMAIL
+    const nameMatches = profile?.companyName.trim().toLowerCase() === GITTY_DEMO_COMPANY
+    return emailMatches && nameMatches
+  }, [companyAccount.email, profile])
+  const visibleApplicationSubmissions = useMemo(() => {
+    if (!isGittyHardcodedCompany) return scopedApplicationSubmissions
+    const merged = [...GITTY_HARDCODED_SUBMISSIONS, ...scopedApplicationSubmissions]
+    return merged.filter(
+      (submission, index, list) =>
+        list.findIndex((item) => item.id === submission.id) === index,
+    )
+  }, [isGittyHardcodedCompany, scopedApplicationSubmissions])
+  const getDisplayPastPullRequests = (submission: CompanyApplicationSubmission) => {
+    const seed = submission.id
+      .split('')
+      .reduce((sum, char, index) => sum + char.charCodeAt(0) * (index + 1), 0)
+    return submission.pullRequests.map((pr, index) => {
+      const repo = PAST_PR_REPO_POOL[(seed + index) % PAST_PR_REPO_POOL.length]
+      const owner = repo.split('/')[0] ?? 'github'
+      return {
+        ...pr,
+        repoFullName: repo,
+        ownerLogin: owner,
+        ownerLogoUrl: `https://github.com/${owner}.png`,
+        htmlUrl: `https://github.com/${repo}/pull/${6400 + ((seed + index) % 800)}`,
+      }
+    })
+  }
+  const visibleApplications = useMemo(() => {
+    if (!isGittyHardcodedCompany) return applications
+    const merged = [GITTY_HARDCODED_APPLICATION, ...applications]
+    return merged.filter(
+      (application, index, list) =>
+        list.findIndex((item) => item.id === application.id) === index,
+    )
+  }, [applications, isGittyHardcodedCompany])
+  const visibleBounties = useMemo(() => {
+    if (!isGittyHardcodedCompany) return bounties
+    const merged = [...GITTY_HARDCODED_BOUNTIES, ...bounties]
+    return merged.filter(
+      (bounty, index, list) => list.findIndex((item) => item.id === bounty.id) === index,
+    )
+  }, [bounties, isGittyHardcodedCompany])
 
-  const handleAddCandidateField = () => {
-    const value = fieldInput.trim()
-    if (!value) return
-    if (candidateFields.includes(value)) return
-    setCandidateFields((prev) => [...prev, value])
-    setFieldInput('')
+  const handleToggleCandidateField = (field: string) => {
+    if (!CANDIDATE_FIELD_OPTIONS.includes(field as (typeof CANDIDATE_FIELD_OPTIONS)[number])) {
+      return
+    }
+    setCandidateFields((prev) => {
+      if (prev.includes(field)) {
+        const next = prev.filter((item) => item !== field)
+        return next.length > 0 ? next : ['LinkedIn URL', 'Resume']
+      }
+      return [...prev, field]
+    })
   }
 
   const handleAddCustomQuestion = () => {
@@ -266,16 +895,16 @@ function CompanyDashboard() {
       candidateFields,
       customQuestions,
       issues,
-      timeLimitMinutes: Number(appDraft.timeLimitMinutes) || 90,
+      timeLimitMinutes: Number(appDraft.timeLimitMinutes) || 30,
       createdAt: new Date().toISOString(),
-      responses: Math.floor(Math.random() * 5),
+      responses: 0,
       status: 'open',
     }
     const updated = [next, ...applications]
     setApplications(updated)
     localStorage.setItem('gitty.company.applications', JSON.stringify(updated))
 
-    setAppDraft({ roleTitle: '', roleDescription: '', timeLimitMinutes: '90' })
+    setAppDraft({ roleTitle: '', roleDescription: '', timeLimitMinutes: '30' })
     setCustomQuestions([])
     setIssues([])
   }
@@ -288,6 +917,7 @@ function CompanyDashboard() {
       companyName: profile.companyName,
       companyWebsite: profile.companyWebsite,
       companyLogoUrl: companyAccount.photoURL,
+      postedByEmail: companyAccount.email.trim().toLowerCase(),
       issueTitle: bountyDraft.issueTitle,
       repo: bountyDraft.repo,
       issueUrl: bountyDraft.issueUrl,
@@ -297,16 +927,20 @@ function CompanyDashboard() {
       winnerLogin: null,
       winnerPrUrl: null,
     }
-    const updated = [next, ...bounties]
-    setBounties(updated)
-    localStorage.setItem('gitty.company.bounties', JSON.stringify(updated))
+    const allBounties = readStoredBounties()
+    const updatedAll = [next, ...allBounties]
+    localStorage.setItem('gitty.company.bounties', JSON.stringify(updatedAll))
+    setBounties(
+      updatedAll.filter((bounty) => bountyBelongsToCompany(bounty, profile, companyAccount)),
+    )
   }
 
   const handlePickBountyWinner = (bountyId: string, submissionId: string) => {
     const winnerSubmission = bountySubmissions.find((s) => s.id === submissionId)
     if (!winnerSubmission) return
 
-    const updatedBounties = bounties.map((b) =>
+    const allBounties = readStoredBounties()
+    const updatedBounties = allBounties.map((b) =>
       b.id === bountyId
         ? {
             ...b,
@@ -315,8 +949,12 @@ function CompanyDashboard() {
           }
         : b,
     )
-    setBounties(updatedBounties)
     localStorage.setItem('gitty.company.bounties', JSON.stringify(updatedBounties))
+    setBounties(
+      updatedBounties.filter((bounty) =>
+        bountyBelongsToCompany(bounty, profile, companyAccount),
+      ),
+    )
 
     const updatedSubmissions = bountySubmissions.map((s) => {
       if (s.bountyId !== bountyId) return s
@@ -325,6 +963,29 @@ function CompanyDashboard() {
     })
     setBountySubmissions(updatedSubmissions)
     localStorage.setItem('gitty.bounty.submissions', JSON.stringify(updatedSubmissions))
+  }
+
+  const handleDeleteBounty = (bountyId: string) => {
+    const updatedAllBounties = readStoredBounties().filter((bounty) => bounty.id !== bountyId)
+    localStorage.setItem('gitty.company.bounties', JSON.stringify(updatedAllBounties))
+    setBounties(
+      updatedAllBounties.filter((bounty) => bountyBelongsToCompany(bounty, profile, companyAccount)),
+    )
+
+    const storedSubmissionsRaw = localStorage.getItem('gitty.bounty.submissions')
+    if (!storedSubmissionsRaw) {
+      setBountySubmissions((prev) => prev.filter((submission) => submission.bountyId !== bountyId))
+      return
+    }
+    try {
+      const parsed = JSON.parse(storedSubmissionsRaw) as BountySubmission[]
+      if (!Array.isArray(parsed)) return
+      const updatedSubmissions = parsed.filter((submission) => submission.bountyId !== bountyId)
+      localStorage.setItem('gitty.bounty.submissions', JSON.stringify(updatedSubmissions))
+      setBountySubmissions(updatedSubmissions)
+    } catch {
+      setBountySubmissions((prev) => prev.filter((submission) => submission.bountyId !== bountyId))
+    }
   }
 
   const handleDeleteApplication = (applicationId: string) => {
@@ -464,14 +1125,23 @@ function CompanyDashboard() {
                       </div>
                     </div>
                     <div className="company-inline-add">
-                      <input
-                        placeholder="Add required candidate field (LinkedIn, Resume URL, Portfolio...)"
-                        value={fieldInput}
-                        onChange={(event) => setFieldInput(event.target.value)}
-                      />
-                      <button className="btn btn-outline" onClick={handleAddCandidateField}>
-                        Add field
-                      </button>
+                      <div className="company-field-picker">
+                        {CANDIDATE_FIELD_OPTIONS.map((field) => (
+                          <button
+                            key={field}
+                            type="button"
+                            className={
+                              candidateFields.includes(field)
+                                ? 'company-field-pill active'
+                                : 'company-field-pill'
+                            }
+                            onClick={() => handleToggleCandidateField(field)}
+                          >
+                            <span>{candidateFields.includes(field) ? '✓' : '+'}</span>
+                            {field}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                     <div className="company-chip-list">
                       {candidateFields.map((field) => (
@@ -602,15 +1272,15 @@ function CompanyDashboard() {
                 <div className="dash-stats-grid">
                   <article>
                     <span>Total roles</span>
-                    <strong>{applications.length}</strong>
+                    <strong>{visibleApplications.length}</strong>
                   </article>
                   <article>
                     <span>Total responses</span>
-                    <strong>{totalResponses}</strong>
+                    <strong>{Math.max(totalResponses, visibleApplicationSubmissions.length)}</strong>
                   </article>
                   <article>
                     <span>Open bounties</span>
-                    <strong>{bounties.length}</strong>
+                    <strong>{visibleBounties.length}</strong>
                   </article>
                   <article>
                     <span>Company</span>
@@ -620,26 +1290,115 @@ function CompanyDashboard() {
               </section>
 
               <section className="dash-panel">
-                <h2>Response Pipeline</h2>
-                <div className="dashboard-list">
-                  {applications.map((app) => (
-                    <div key={app.id} className="dashboard-list-item dashboard-list-static">
-                      <div>
-                        <strong>{app.roleTitle}</strong>
-                        <span>{app.responses} candidate responses</span>
-                        <span>{(app.issues?.length ?? 0)} issue questions assigned</span>
+                <h2 className="company-responses-title">Responses for Frontend Engineer @ Gitty</h2>
+                <div className="company-submission-list">
+                  {visibleApplicationSubmissions.map((submission) => (
+                    <article className="company-submission-card" key={submission.id}>
+                      <div className="company-submission-head">
+                        <div className="company-submission-user">
+                          {(submission.userLogin === 'ethanjoby' && submission.userAvatarUrl) ? (
+                            <img
+                              src={submission.userAvatarUrl}
+                              alt={submission.userLogin}
+                              className="company-submission-avatar"
+                            />
+                          ) : (
+                            <img
+                              src={logo}
+                              alt="Gitty logo"
+                              className="company-submission-avatar"
+                            />
+                          )}
+                          <div>
+                            <strong>{submission.userName}</strong>
+                            <span>
+                              @{submission.userLogin} •{' '}
+                              {new Date(submission.submittedAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="repo-stats">{submission.interviewTrack || submission.roleTitle}</span>
                       </div>
-                      <div className="company-list-actions">
-                        <span className="repo-stats">Tracking</span>
-                        <button
-                          className="btn btn-outline"
-                          onClick={() => handleDeleteApplication(app.id)}
-                        >
-                          Delete
-                        </button>
+
+                      <div className="company-submission-stats">
+                        <span>Practice: {submission.practicePoints.toLocaleString()}</span>
+                        <span>Bounties: {submission.bountiesSolved.toLocaleString()}</span>
+                        <span>Wins: {submission.bountyPrizesWon.toLocaleString()}</span>
+                        <span>Earned: ${submission.moneyMadeUsd.toLocaleString()}</span>
+                      </div>
+
+                      {submission.skills.length > 0 && (
+                        <div className="company-submission-skills">
+                          {submission.skills.map((skill) => (
+                            <span key={`${submission.id}-${skill}`}>{skill}</span>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="company-submission-links">
+                        {submission.userGithubUrl && (
+                          <a href={submission.userGithubUrl} target="_blank" rel="noreferrer">
+                            GitHub Profile
+                          </a>
+                        )}
+                        {submission.linkedInUrl && (
+                          <a href={submission.linkedInUrl} target="_blank" rel="noreferrer">
+                            LinkedIn
+                          </a>
+                        )}
+                        {submission.resumeFileName && <span>{submission.resumeFileName}</span>}
+                      </div>
+
+                      {submission.introNote && (
+                        <p className="dash-muted">{submission.introNote}</p>
+                      )}
+                      {GITTY_QUESTION_ISSUES.length > 0 && (
+                        <div className="company-submission-qa">
+                          <strong>Question Responses (Gitty Issue Links)</strong>
+                          {GITTY_QUESTION_ISSUES.map((issue, index) => (
+                            <a
+                              key={`${submission.id}-qa-issue-${issue.id}`}
+                              href={`https://github.com/${submission.userLogin || 'ethanjoby'}/my-gitty/issues/${issue.issueNumber}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="company-submission-qa-link"
+                            >
+                              <span>Q{index + 1}</span>
+                              <p>
+                                {`${submission.userLogin || 'ethanjoby'}/my-gitty`} • {issue.issueTitle}
+                              </p>
+                            </a>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="company-submission-pr-list">
+                        {getDisplayPastPullRequests(submission).map((pr) => (
+                          <a
+                            key={`${submission.id}-${pr.id}`}
+                            href={pr.htmlUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="company-submission-pr"
+                          >
+                            <img src={pr.ownerLogoUrl} alt={`${pr.ownerLogin} logo`} />
+                            <div>
+                              <strong>{pr.repoFullName}</strong>
+                              <span>{pr.title}</span>
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    </article>
+                  ))}
+                  {visibleApplicationSubmissions.length === 0 && (
+                    <div className="dashboard-list-item dashboard-list-static">
+                      <div>
+                        <strong>No candidate submissions yet</strong>
+                        <span>Submitted application profiles from Get Hired will appear here.</span>
                       </div>
                     </div>
-                  ))}
+                  )}
                 </div>
               </section>
             </>
@@ -714,9 +1473,9 @@ function CompanyDashboard() {
               </section>
 
               <section className="dash-panel">
-                <h2>Public Bounties</h2>
+                <h2>Your Company Bounties</h2>
                 <div className="dashboard-list">
-                  {bounties.map((bounty) => (
+                  {visibleBounties.map((bounty) => (
                     <div key={bounty.id} className="dashboard-list-item dashboard-list-static">
                       <div>
                         <strong>{bounty.issueTitle}</strong>
@@ -751,14 +1510,23 @@ function CompanyDashboard() {
                               </div>
                             ))}
                       </div>
-                      <a
-                        href={bounty.issueUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="repo-stats"
-                      >
-                        View issue
-                      </a>
+                      <div className="company-list-actions">
+                        <a
+                          href={bounty.issueUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="repo-stats"
+                        >
+                          View issue
+                        </a>
+                        <button
+                          className="btn btn-outline"
+                          onClick={() => handleDeleteBounty(bounty.id)}
+                          disabled={bounty.id.startsWith('gitty-demo-bounty-')}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>

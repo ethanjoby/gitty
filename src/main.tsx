@@ -9,6 +9,7 @@ import GetStarted from './GetStarted.tsx'
 import CompanySignIn from './CompanySignIn.tsx'
 import CompanyDashboard from './CompanyDashboard.tsx'
 import CompanyOnboarding from './CompanyOnboarding.tsx'
+import UserOnboarding from './UserOnboarding.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -17,7 +18,9 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/" element={<App />} />
         <Route path="/get-started" element={<GetStarted />} />
         <Route path="/signin" element={<SignIn />} />
+        <Route path="/onboarding" element={<UserOnboarding />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard/:tab" element={<Dashboard />} />
         <Route path="/company/signin" element={<CompanySignIn />} />
         <Route path="/company/onboarding" element={<CompanyOnboarding />} />
         <Route path="/company/dashboard" element={<CompanyDashboard />} />
