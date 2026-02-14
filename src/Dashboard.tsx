@@ -184,8 +184,8 @@ type UiToast = {
 
 const PRACTICE_PAGE_SIZE = 200
 const INTERVIEW_DURATION_SECONDS = 30 * 60
-const DEMO_TIMER_REAL_DURATION_SECONDS = 20
-const DEMO_TIMER_SPEED = INTERVIEW_DURATION_SECONDS / DEMO_TIMER_REAL_DURATION_SECONDS
+const DEMO_TIMER_SPEED = 15
+const DEMO_TIMER_TICK_MS = Math.round(1000 / DEMO_TIMER_SPEED)
 
 const SKILLS = [
   'React',
@@ -1016,14 +1016,12 @@ function Dashboard() {
     if (!sessionStartedAt) return
 
     const interval = window.setInterval(() => {
-      const elapsed = Math.floor((Date.now() - sessionStartedAt) / 1000)
-      const acceleratedElapsed = Math.floor(elapsed * DEMO_TIMER_SPEED)
-      const remaining = Math.max(0, INTERVIEW_DURATION_SECONDS - acceleratedElapsed)
-      setSecondsLeft(remaining)
-      if (remaining === 0) {
-        window.clearInterval(interval)
-      }
-    }, 1000)
+      setSecondsLeft((prev) => {
+        const next = Math.max(0, prev - 1)
+        if (next === 0) window.clearInterval(interval)
+        return next
+      })
+    }, DEMO_TIMER_TICK_MS)
 
     return () => window.clearInterval(interval)
   }, [sessionStartedAt])
@@ -1032,12 +1030,12 @@ function Dashboard() {
     if (!hiredQuestionSessionStartedAt) return
 
     const interval = window.setInterval(() => {
-      const elapsed = Math.floor((Date.now() - hiredQuestionSessionStartedAt) / 1000)
-      const acceleratedElapsed = Math.floor(elapsed * DEMO_TIMER_SPEED)
-      const remaining = Math.max(0, INTERVIEW_DURATION_SECONDS - acceleratedElapsed)
-      setHiredQuestionSecondsLeft(remaining)
-      if (remaining === 0) window.clearInterval(interval)
-    }, 1000)
+      setHiredQuestionSecondsLeft((prev) => {
+        const next = Math.max(0, prev - 1)
+        if (next === 0) window.clearInterval(interval)
+        return next
+      })
+    }, DEMO_TIMER_TICK_MS)
 
     return () => window.clearInterval(interval)
   }, [hiredQuestionSessionStartedAt])
@@ -2055,6 +2053,8 @@ function Dashboard() {
     if (interviewIssues.length === 0) return
     const allChecked = interviewIssues.every((issue) => verifiedIssueIds.includes(issue.id))
     if (!allChecked) return
+    setSecondsLeft(0)
+    setSessionStartedAt(null)
     const timer = window.setTimeout(() => setInterviewView('scores'), 500)
     return () => window.clearTimeout(timer)
   }, [activeTab, interviewIssues, verifiedIssueIds])
@@ -2065,6 +2065,12 @@ function Dashboard() {
       hiredQuestions.slice(0, 3).every((question) => hiredQuestionVerified[question.id]),
     [hiredQuestions, hiredQuestionVerified],
   )
+
+  useEffect(() => {
+    if (!hiredAllQuestionsChecked) return
+    setHiredQuestionSecondsLeft(0)
+    setHiredQuestionSessionStartedAt(null)
+  }, [hiredAllQuestionsChecked])
 
   if (!user) {
     return (
