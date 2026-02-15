@@ -636,6 +636,13 @@ function normalizeApplicationSubmission(raw: unknown): CompanyApplicationSubmiss
   }
 }
 
+function parseIssueFromUrl(issueUrl: string) {
+  const trimmed = issueUrl.trim()
+  const match = trimmed.match(/^https?:\/\/github\.com\/([^/]+\/[^/]+)\/issues\/(\d+)$/i)
+  if (!match) return null
+  return { repo: match[1], issueNumber: match[2] }
+}
+
 function CompanyDashboard() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<CompanyTab>('applications')
@@ -656,14 +663,10 @@ function CompanyDashboard() {
     'LinkedIn URL',
     'Resume',
   ])
-  const [customQuestions, setCustomQuestions] = useState<string[]>([])
   const [issueDraft, setIssueDraft] = useState({
-    repo: '',
     issueUrl: '',
-    issueTitle: '',
   })
   const [issues, setIssues] = useState<ApplicationIssue[]>([])
-  const [questionInput, setQuestionInput] = useState('')
   const [companyAccount, setCompanyAccount] = useState<CompanyAccount>({
     name: '',
     email: '',
@@ -671,8 +674,6 @@ function CompanyDashboard() {
   })
 
   const [bountyDraft, setBountyDraft] = useState({
-    issueTitle: '',
-    repo: '',
     issueUrl: '',
     priority: 'high' as BountyPosting['priority'],
     payoutUsd: '500',
@@ -868,32 +869,32 @@ function CompanyDashboard() {
     })
   }
 
-  const handleAddCustomQuestion = () => {
-    const value = questionInput.trim()
-    if (!value) return
-    setCustomQuestions((prev) => [...prev, value])
-    setQuestionInput('')
-  }
-
   const handleAddIssue = () => {
-    if (!issueDraft.repo || !issueDraft.issueUrl || !issueDraft.issueTitle) return
-    const next: ApplicationIssue = { id: crypto.randomUUID(), ...issueDraft }
+    if (!issueDraft.issueUrl.trim()) return
+    const parsed = parseIssueFromUrl(issueDraft.issueUrl)
+    const next: ApplicationIssue = {
+      id: crypto.randomUUID(),
+      issueUrl: issueDraft.issueUrl.trim(),
+      repo: parsed?.repo ?? 'unknown/repo',
+      issueTitle: parsed ? `Issue #${parsed.issueNumber}` : 'Linked GitHub issue',
+    }
+    if (issues.some((item) => item.issueUrl === next.issueUrl)) return
     setIssues((prev) => [...prev, next])
-    setIssueDraft({ repo: '', issueUrl: '', issueTitle: '' })
+    setIssueDraft({ issueUrl: '' })
   }
 
   const handleCreateApplication = () => {
-    if (!appDraft.roleTitle || issues.length === 0 || !profile) return
+    if (issues.length === 0 || !profile) return
     const next: CompanyApplication = {
       id: crypto.randomUUID(),
       companyName: profile.companyName,
       companyWebsite: profile.companyWebsite,
       companyType: profile.companyType,
       companyLogoUrl: companyAccount.photoURL,
-      roleTitle: appDraft.roleTitle,
+      roleTitle: appDraft.roleTitle.trim() || 'Frontend Engineer',
       roleDescription: appDraft.roleDescription,
       candidateFields,
-      customQuestions,
+      customQuestions: [],
       issues,
       timeLimitMinutes: Number(appDraft.timeLimitMinutes) || 30,
       createdAt: new Date().toISOString(),
@@ -905,22 +906,23 @@ function CompanyDashboard() {
     localStorage.setItem('gitty.company.applications', JSON.stringify(updated))
 
     setAppDraft({ roleTitle: '', roleDescription: '', timeLimitMinutes: '30' })
-    setCustomQuestions([])
     setIssues([])
   }
 
   const handleCreateBounty = () => {
-    if (!bountyDraft.issueTitle || !bountyDraft.repo || !bountyDraft.issueUrl || !profile)
-      return
+    if (!bountyDraft.issueUrl.trim() || !profile) return
+    const parsed = parseIssueFromUrl(bountyDraft.issueUrl)
+    const issueTitle = parsed ? `Issue #${parsed.issueNumber}` : 'Linked GitHub issue'
+    const repo = parsed?.repo ?? 'unknown/repo'
     const next: BountyPosting = {
       id: crypto.randomUUID(),
       companyName: profile.companyName,
       companyWebsite: profile.companyWebsite,
       companyLogoUrl: companyAccount.photoURL,
       postedByEmail: companyAccount.email.trim().toLowerCase(),
-      issueTitle: bountyDraft.issueTitle,
-      repo: bountyDraft.repo,
-      issueUrl: bountyDraft.issueUrl,
+      issueTitle,
+      repo,
+      issueUrl: bountyDraft.issueUrl.trim(),
       priority: bountyDraft.priority,
       payoutUsd: Number(bountyDraft.payoutUsd) || 0,
       createdAt: new Date().toISOString(),
@@ -933,6 +935,11 @@ function CompanyDashboard() {
     setBounties(
       updatedAll.filter((bounty) => bountyBelongsToCompany(bounty, profile, companyAccount)),
     )
+    setBountyDraft({
+      issueUrl: '',
+      priority: 'high',
+      payoutUsd: '500',
+    })
   }
 
   const handlePickBountyWinner = (bountyId: string, submissionId: string) => {
@@ -1153,34 +1160,8 @@ function CompanyDashboard() {
                   </section>
 
                   <section className="company-builder-section">
-                    <h3>Part 2: Questions Section</h3>
-                    <div className="company-inline-add">
-                      <input
-                        placeholder="Add custom question..."
-                        value={questionInput}
-                        onChange={(event) => setQuestionInput(event.target.value)}
-                      />
-                      <button className="btn btn-outline" onClick={handleAddCustomQuestion}>
-                        Add question
-                      </button>
-                    </div>
-                    <div className="company-chip-list">
-                      {customQuestions.map((question, index) => (
-                        <span key={`${question}-${index}`} className="company-chip">
-                          {question}
-                        </span>
-                      ))}
-                    </div>
+                    <h3>Part 2: Issues Section</h3>
                     <div className="company-form-grid company-issues-form">
-                      <div className="practice-field">
-                        <label>Repository (owner/repo)</label>
-                        <input
-                          value={issueDraft.repo}
-                          onChange={(event) =>
-                            setIssueDraft((prev) => ({ ...prev, repo: event.target.value }))
-                          }
-                        />
-                      </div>
                       <div className="practice-field">
                         <label>Issue URL</label>
                         <input
@@ -1188,21 +1169,13 @@ function CompanyDashboard() {
                           onChange={(event) =>
                             setIssueDraft((prev) => ({ ...prev, issueUrl: event.target.value }))
                           }
-                        />
-                      </div>
-                      <div className="practice-field company-span-2">
-                        <label>Issue title</label>
-                        <input
-                          value={issueDraft.issueTitle}
-                          onChange={(event) =>
-                            setIssueDraft((prev) => ({ ...prev, issueTitle: event.target.value }))
-                          }
+                          placeholder="https://github.com/owner/repo/issues/123"
                         />
                       </div>
                     </div>
                     <div className="practice-actions">
                       <button className="btn btn-outline" onClick={handleAddIssue}>
-                        Add issue question
+                        Add issue
                       </button>
                     </div>
                     <div className="dashboard-list company-mini-list">
@@ -1237,9 +1210,7 @@ function CompanyDashboard() {
                         <span>
                           {(app.issues?.length ?? 0)} issue questions • {app.timeLimitMinutes} min total
                         </span>
-                        <span>
-                          {(app.candidateFields?.length ?? 0)} required fields • {(app.customQuestions?.length ?? 0)} custom questions
-                        </span>
+                        <span>{(app.candidateFields?.length ?? 0)} required fields</span>
                       </div>
                       <div className="company-list-actions">
                         <span className="repo-stats">{app.status.toUpperCase()}</span>
@@ -1413,30 +1384,13 @@ function CompanyDashboard() {
                 </p>
                 <div className="company-form-grid">
                   <div className="practice-field">
-                    <label>Issue title</label>
-                    <input
-                      value={bountyDraft.issueTitle}
-                      onChange={(event) =>
-                        setBountyDraft((prev) => ({ ...prev, issueTitle: event.target.value }))
-                      }
-                    />
-                  </div>
-                  <div className="practice-field">
-                    <label>Repository (owner/repo)</label>
-                    <input
-                      value={bountyDraft.repo}
-                      onChange={(event) =>
-                        setBountyDraft((prev) => ({ ...prev, repo: event.target.value }))
-                      }
-                    />
-                  </div>
-                  <div className="practice-field">
                     <label>Issue URL</label>
                     <input
                       value={bountyDraft.issueUrl}
                       onChange={(event) =>
                         setBountyDraft((prev) => ({ ...prev, issueUrl: event.target.value }))
                       }
+                      placeholder="https://github.com/owner/repo/issues/123"
                     />
                   </div>
                   <div className="practice-field">
@@ -1465,7 +1419,7 @@ function CompanyDashboard() {
                     />
                   </div>
                 </div>
-                <div className="practice-actions">
+                <div className="practice-actions company-bounty-create-actions">
                   <button className="btn btn-primary" onClick={handleCreateBounty}>
                     Create bounty
                   </button>

@@ -1994,6 +1994,10 @@
   margin-top: 14px;
 }
 
+.company-bounty-create-actions {
+  margin-top: 8px;
+}
+
 .practice-result-actions {
   display: flex;
   gap: 8px;
