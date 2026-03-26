@@ -2107,9 +2107,18 @@ function Dashboard() {
           </span>
           <span>Gitty</span>
         </div>
-        <button className="btn btn-outline dash-logout-btn" onClick={handleSignOut}>
-          Log out
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {sidebarAvatar && (
+            <img
+              src={sidebarAvatar}
+              alt={data?.profile.login ?? 'User avatar'}
+              style={{ width: 32, height: 32, borderRadius: '999px', objectFit: 'cover', border: '1px solid var(--line-hi)' }}
+            />
+          )}
+          <button className="btn btn-ghost dash-logout-btn" onClick={handleSignOut}>
+            Log out
+          </button>
+        </div>
       </header>
 
       <div className="dash-layout">

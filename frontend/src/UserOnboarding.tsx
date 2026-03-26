@@ -6,9 +6,9 @@ import logo from './gitty.png'
 import './App.css'
 
 const STEPS = [
-  { key: 'fullName', label: 'Full Name' },
-  { key: 'linkedInUrl', label: 'LinkedIn URL' },
-  { key: 'resume', label: 'Resume Upload' },
+  { key: 'fullName', label: 'Full Name', title: 'What should we call you?', sub: 'Your name as it appears on your profile.' },
+  { key: 'linkedInUrl', label: 'LinkedIn URL', title: 'Where can companies find you?', sub: 'Paste your LinkedIn profile URL.' },
+  { key: 'resume', label: 'Resume', title: 'Upload your resume', sub: 'PDF preferred. Stored locally — never shared without permission.' },
 ] as const
 
 type StepKey = (typeof STEPS)[number]['key']
@@ -22,6 +22,7 @@ function UserOnboarding() {
   })
   const [resumeFileName, setResumeFileName] = useState('')
   const [resumeFileDataUrl, setResumeFileDataUrl] = useState('')
+  const [dragActive, setDragActive] = useState(false)
 
   useEffect(() => {
     const savedResumeFile = localStorage.getItem('gitty.profile.resume.file')
@@ -111,15 +112,22 @@ function UserOnboarding() {
     setStepIndex((prev) => prev - 1)
   }
 
-  return (
-    <div className="dash-shell company-shell">
-      <div className="dash-bg" aria-hidden="true">
-        <div className="dash-bg-grid dash-bg-grid-1" />
-        <div className="dash-bg-grid dash-bg-grid-2" />
-        <div className="dash-bg-vignette" />
-      </div>
+  const handleFileDrop = (file: File) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      const dataUrl = typeof reader.result === 'string' ? reader.result : ''
+      if (!dataUrl) return
+      setResumeFileName(file.name)
+      setResumeFileDataUrl(dataUrl)
+    }
+    reader.readAsDataURL(file)
+  }
 
-      <header className="dash-topbar">
+  return (
+    <div className="ob-shell">
+      <div className="ob-bg" aria-hidden="true" />
+
+      <header className="ob-topbar">
         <div className="dash-brand">
           <span className="logo-mark logo-mark-dark">
             <img src={logo} alt="Gitty logo" />
@@ -128,68 +136,90 @@ function UserOnboarding() {
         </div>
       </header>
 
-      <main className="company-onboarding-main company-onboarding-single">
-        <section className="company-onboarding-left company-step-card">
-          <p className="company-eyebrow">Engineer Setup</p>
-          <div className="company-step-head">
-            <h1>Let’s build your engineer profile</h1>
-            <span>
-              Part {stepIndex + 1} / {STEPS.length}
-            </span>
+      <main className="ob-main">
+        <div className="ob-card">
+          <div className="ob-dots" aria-label={`Step ${stepIndex + 1} of ${STEPS.length}`}>
+            {STEPS.map((_, i) => (
+              <span
+                key={i}
+                className={
+                  i === stepIndex
+                    ? 'ob-dot ob-dot-active'
+                    : i < stepIndex
+                    ? 'ob-dot ob-dot-done'
+                    : 'ob-dot ob-dot-upcoming'
+                }
+              />
+            ))}
           </div>
-          <p className="dash-muted">Quick setup before entering your dashboard.</p>
 
-          <div className="company-step-question">
-            <label>{currentStep.label}</label>
+          <div className="ob-head">
+            <p className="ob-eyebrow">Engineer Setup</p>
+            <h1 className="ob-title">{currentStep.title}</h1>
+            <p className="ob-sub">{currentStep.sub}</p>
+          </div>
+
+          <div className="ob-field-wrap">
+            <label className="ob-label" htmlFor="ob-input">{currentStep.label}</label>
             {currentStep.key !== 'resume' ? (
               <input
+                id="ob-input"
+                className="ob-input"
                 value={form[currentStep.key as Exclude<StepKey, 'resume'>]}
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, [currentStep.key]: event.target.value }))
                 }
-                placeholder={`Enter ${currentStep.label.toLowerCase()}...`}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleNext() }}
+                placeholder={currentStep.key === 'fullName' ? 'Ada Lovelace' : 'https://linkedin.com/in/...'}
+                autoFocus
               />
             ) : (
-              <div className="company-step-upload">
-                <label className="btn btn-outline sign-in-upload-btn">
-                  Upload Resume
-                  <input
-                    className="profile-upload-input"
-                    type="file"
-                    accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    onChange={(event) => {
-                      const file = event.target.files?.[0]
-                      if (!file) return
-                      const reader = new FileReader()
-                      reader.onload = () => {
-                        const dataUrl = typeof reader.result === 'string' ? reader.result : ''
-                        if (!dataUrl) return
-                        setResumeFileName(file.name)
-                        setResumeFileDataUrl(dataUrl)
-                      }
-                      reader.readAsDataURL(file)
-                    }}
-                  />
-                </label>
-                <strong className="sign-in-upload-name">
-                  {resumeFileName || 'No file selected'}
-                </strong>
-              </div>
+              <label
+                className={`ob-upload${dragActive ? ' ob-upload-drag' : ''}${resumeFileDataUrl ? ' ob-upload-done' : ''}`}
+                onDragOver={(e) => { e.preventDefault(); setDragActive(true) }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  setDragActive(false)
+                  const file = e.dataTransfer.files?.[0]
+                  if (file) handleFileDrop(file)
+                }}
+              >
+                <input
+                  className="ob-upload-input"
+                  type="file"
+                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0]
+                    if (!file) return
+                    handleFileDrop(file)
+                  }}
+                />
+                <svg className="ob-upload-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                {resumeFileName ? (
+                  <span className="ob-upload-filename">{resumeFileName}</span>
+                ) : (
+                  <span className="ob-upload-hint">Drop your resume here or click to upload</span>
+                )}
+              </label>
             )}
-            <p className="dash-muted">
-              {completedCount} of {STEPS.length} completed
-            </p>
           </div>
 
-          <div className="practice-actions company-step-actions">
-            <button className="btn btn-outline" onClick={handleBack} disabled={stepIndex === 0}>
+          <p className="ob-progress-text">{completedCount} of {STEPS.length} completed</p>
+
+          <div className="ob-actions">
+            <button className="btn btn-ghost" onClick={handleBack} disabled={stepIndex === 0}>
               Back
             </button>
-            <button className="btn btn-primary" onClick={handleNext} disabled={!canContinue}>
-              {isLastStep ? 'Finish setup' : 'Next'}
+            <button className="btn btn-cta" onClick={handleNext} disabled={!canContinue}>
+              {isLastStep ? 'Finish setup' : 'Continue'}
             </button>
           </div>
-        </section>
+        </div>
       </main>
     </div>
   )

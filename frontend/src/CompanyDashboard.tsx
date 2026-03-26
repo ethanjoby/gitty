@@ -1008,32 +1008,32 @@ function CompanyDashboard() {
   }
 
   return (
-    <div className="dash-shell company-shell">
-      <div className="dash-bg" aria-hidden="true">
-        <div className="dash-bg-grid dash-bg-grid-1" />
-        <div className="dash-bg-grid dash-bg-grid-2" />
-        <div className="dash-bg-vignette" />
+    <div className="cd-shell">
+      <div className="cd-bg" aria-hidden="true">
+        <div className="cd-bg-grid cd-bg-grid-1" />
+        <div className="cd-bg-grid cd-bg-grid-2" />
+        <div className="cd-bg-vignette" />
       </div>
 
-      <header className="dash-topbar">
-        <div className="dash-brand">
-          <span className="logo-mark logo-mark-dark">
+      <header className="cd-topbar">
+        <div className="cd-topbar-logo">
+          <span className="cd-logo-mark">
             <img src={logo} alt="Gitty logo" />
           </span>
           <span>Gitty</span>
         </div>
-        <button className="btn btn-outline dash-logout-btn" onClick={handleLogout}>
+        <button className="btn btn-outline cd-logout-btn" onClick={handleLogout}>
           Log out
         </button>
       </header>
 
-      <div className="dash-layout">
-        <aside className="dash-sidebar">
+      <div className="cd-layout">
+        <aside className="cd-sidebar">
           <button
-            className={activeTab === 'applications' ? 'dash-nav-item active' : 'dash-nav-item'}
+            className={activeTab === 'applications' ? 'cd-nav-item active' : 'cd-nav-item'}
             onClick={() => setActiveTab('applications')}
           >
-            <span className="dash-tab-icon" aria-hidden="true">
+            <span className="cd-nav-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none">
                 <path d="M5 6h14M5 12h14M5 18h10" />
               </svg>
@@ -1041,10 +1041,10 @@ function CompanyDashboard() {
             <span>Applications</span>
           </button>
           <button
-            className={activeTab === 'track' ? 'dash-nav-item active' : 'dash-nav-item'}
+            className={activeTab === 'track' ? 'cd-nav-item active' : 'cd-nav-item'}
             onClick={() => setActiveTab('track')}
           >
-            <span className="dash-tab-icon" aria-hidden="true">
+            <span className="cd-nav-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none">
                 <path d="M4 13h4l2-6 4 10 2-4h4" />
               </svg>
@@ -1052,10 +1052,10 @@ function CompanyDashboard() {
             <span>Track Applications</span>
           </button>
           <button
-            className={activeTab === 'bounties' ? 'dash-nav-item active' : 'dash-nav-item'}
+            className={activeTab === 'bounties' ? 'cd-nav-item active' : 'cd-nav-item'}
             onClick={() => setActiveTab('bounties')}
           >
-            <span className="dash-tab-icon" aria-hidden="true">
+            <span className="cd-nav-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none">
                 <path d="M12 3v18M3 12h18" />
                 <circle cx="12" cy="12" r="8" />
@@ -1065,11 +1065,11 @@ function CompanyDashboard() {
           </button>
 
           {profile && (
-            <div className="company-sidebar-profile">
+            <div className="cd-sidebar-profile">
               {companyAccount.photoURL ? (
                 <img src={companyAccount.photoURL} alt="Company profile" />
               ) : (
-                <div className="company-sidebar-avatar-fallback" />
+                <div className="cd-sidebar-avatar-fallback" />
               )}
               <div>
                 <strong>{profile.companyName}</strong>
@@ -1080,7 +1080,7 @@ function CompanyDashboard() {
 
         </aside>
 
-        <main className="dash-main">
+        <main className="cd-content">
           {activeTab === 'applications' && (
             <>
               <section className="dash-panel company-builder">
