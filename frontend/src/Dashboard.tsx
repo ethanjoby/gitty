@@ -694,6 +694,8 @@ function Dashboard() {
   const [issueError, setIssueError] = useState<string | null>(null)
   const [bookmarkedIssueIds, setBookmarkedIssueIds] = useState<number[]>([])
   const [bookmarkedIssues, setBookmarkedIssues] = useState<GitHubIssue[]>([])
+  const [editingSkills, setEditingSkills] = useState(false)
+  const [userIntent] = useState(() => localStorage.getItem('gitty.user.intent') || '')
   const [linkedInUrl, setLinkedInUrl] = useState('')
   const [resumeFileName, setResumeFileName] = useState('')
   const [resumeFileDataUrl, setResumeFileDataUrl] = useState('')
@@ -3359,6 +3361,53 @@ function Dashboard() {
                   <div className="profile-highlight-card profile-highlight-card-mono">
                     <span>Net Worth From Bounties</span>
                     <strong>${animatedBountyNetWorthUsd.toLocaleString()}</strong>
+                  </div>
+                </div>
+                <div className="profile-skills-section">
+                  <div className="profile-section-header">
+                    <h4>Skills</h4>
+                    <button className="profile-edit-btn" onClick={() => setEditingSkills(!editingSkills)}>
+                      {editingSkills ? 'Done' : 'Edit'}
+                    </button>
+                  </div>
+                  <div className="profile-skills-row">
+                    {editingSkills ? (
+                      SKILLS.map(skill => (
+                        <button key={skill} className={`profile-chip${selectedSkills.includes(skill) ? ' profile-chip-active' : ''}`}
+                          onClick={() => toggleSkill(skill)}>
+                          {skill}
+                        </button>
+                      ))
+                    ) : (
+                      selectedSkills.length > 0
+                        ? selectedSkills.map(skill => <span key={skill} className="profile-chip profile-chip-active">{skill}</span>)
+                        : <span style={{ color: 'var(--muted)', fontSize: '14px' }}>No skills selected yet</span>
+                    )}
+                  </div>
+                </div>
+                {userIntent && (
+                  <div className="profile-goal-section">
+                    <h4>Goal</h4>
+                    <span className="profile-goal-badge">
+                      {userIntent === 'learn' ? 'Learning Open Source' : userIntent === 'hired' ? 'Getting Hired' : 'Learning & Getting Hired'}
+                    </span>
+                  </div>
+                )}
+                <div className="profile-progress-section">
+                  <h4>Progress</h4>
+                  <div className="profile-progress-stats">
+                    <div className="profile-progress-stat">
+                      <span className="profile-progress-num">{issues.length}</span>
+                      <span className="profile-progress-label">Issues Explored</span>
+                    </div>
+                    <div className="profile-progress-stat">
+                      <span className="profile-progress-num">{bookmarkedIssueIds.length}</span>
+                      <span className="profile-progress-label">Bookmarked</span>
+                    </div>
+                    <div className="profile-progress-stat">
+                      <span className="profile-progress-num">{data?.pullRequests?.length ?? 0}</span>
+                      <span className="profile-progress-label">PRs Opened</span>
+                    </div>
                   </div>
                 </div>
                 <div className="dash-settings-grid">
