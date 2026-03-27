@@ -709,6 +709,9 @@ function Dashboard() {
   const [sessionCheckedBountyIds, setSessionCheckedBountyIds] = useState<string[]>([])
   const [uiToasts, setUiToasts] = useState<UiToast[]>([])
   const bountyEntryToastsShownRef = useRef(false)
+  const [tourStep, setTourStep] = useState<number>(() => {
+    return localStorage.getItem('gitty.user.tourComplete') === 'true' ? -1 : 0
+  })
   const [hiredStep, setHiredStep] = useState<HiredStep>('browse')
   const [selectedHiredCompany, setSelectedHiredCompany] = useState<HiredCompany | null>(null)
   const [selectedInterviewTrack, setSelectedInterviewTrack] = useState('Full Stack Engineer')
@@ -780,6 +783,27 @@ function Dashboard() {
   const goToTab = (tab: Tab) => {
     setActiveTab(tab)
     if (routeTab !== tab) navigate(`/dashboard/${tab}`)
+  }
+
+  const TOUR_STEPS = [
+    { tab: 'profile', title: 'Your Profile', desc: 'See your GitHub stats, contributions, and pull requests.' },
+    { tab: 'practice', title: 'Practice Questions', desc: 'Search real GitHub issues to practice contributing to open source.' },
+    { tab: 'interview', title: 'Practice Interview', desc: 'Get 3 random issues and 30 minutes to simulate a real challenge.' },
+    { tab: 'hired', title: 'Get Hired', desc: 'Apply to companies by solving their real GitHub issues.' },
+    { tab: 'bounties', title: 'Bounties', desc: 'Solve issues for cash rewards posted by companies.' },
+    { tab: 'settings', title: 'Settings', desc: 'Update your name and manage your session.' },
+  ]
+  const advanceTour = () => {
+    if (tourStep >= TOUR_STEPS.length - 1) {
+      setTourStep(-1)
+      localStorage.setItem('gitty.user.tourComplete', 'true')
+    } else {
+      setTourStep(tourStep + 1)
+    }
+  }
+  const skipTour = () => {
+    setTourStep(-1)
+    localStorage.setItem('gitty.user.tourComplete', 'true')
   }
 
   useEffect(() => {
@@ -2215,6 +2239,30 @@ function Dashboard() {
             <span>Bounties</span>
           </button>
 
+          {tourStep >= 0 && (
+            <div
+              className="tour-tooltip"
+              style={tourStep < 5
+                ? { top: `${tourStep * 42 + 12}px` }
+                : { bottom: '4px' }
+              }
+            >
+              <div className="tour-tooltip-arrow" />
+              <strong className="tour-tooltip-title">{TOUR_STEPS[tourStep].title}</strong>
+              <p className="tour-tooltip-desc">{TOUR_STEPS[tourStep].desc}</p>
+              <div className="tour-tooltip-actions">
+                <button className="tour-tooltip-skip" onClick={skipTour}>Skip tour</button>
+                <button className="tour-tooltip-next" onClick={advanceTour}>
+                  {tourStep === TOUR_STEPS.length - 1 ? 'Done' : 'Next'}
+                </button>
+              </div>
+              <div className="tour-tooltip-progress">
+                {TOUR_STEPS.map((_, i) => (
+                  <span key={i} className={`tour-dot${i === tourStep ? ' tour-dot-active' : i < tourStep ? ' tour-dot-done' : ''}`} />
+                ))}
+              </div>
+            </div>
+          )}
           <div className="dash-sidebar-bottom">
             <button
               className={activeTab === 'settings' ? 'dash-nav-item active' : 'dash-nav-item'}
