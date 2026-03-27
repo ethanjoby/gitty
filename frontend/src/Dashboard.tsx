@@ -740,6 +740,14 @@ function Dashboard() {
   const [verifiedPrLinks, setVerifiedPrLinks] = useState<Record<number, string>>({})
   const [verifiedIssueIds, setVerifiedIssueIds] = useState<number[]>([])
   const [verifyingIssueId, setVerifyingIssueId] = useState<number | null>(null)
+  const [evaluationResults, setEvaluationResults] = useState<Record<number, {
+    score: number
+    summary: string
+    strengths: string[]
+    issues: string[]
+    actionable_feedback: string[]
+    confidence: string
+  }>>({})
   const contribMapRef = useRef<HTMLDivElement | null>(null)
   const sidebarAvatar = data?.profile.avatar_url ?? user?.photoURL ?? ''
   const isEthanDemoAccount = useMemo(
@@ -2037,6 +2045,21 @@ function Dashboard() {
         setVerifiedIssueIds((prev) => [...prev, issue.id])
       }
       setVerifiedPrLinks((prev) => ({ ...prev, [issue.id]: matched.html_url }))
+
+      // Attempt AI evaluation (graceful fallback if backend unavailable)
+      try {
+        const evalResponse = await fetch('http://localhost:8000/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ issue_url: issue.html_url, pr_url: matched.html_url }),
+        })
+        if (evalResponse.ok) {
+          const evalData = await evalResponse.json()
+          setEvaluationResults(prev => ({ ...prev, [issue.id]: evalData }))
+        }
+      } catch {
+        // Backend unavailable — client-side mock will be used
+      }
     } catch (verificationError) {
       setInterviewError(
         verificationError instanceof Error
@@ -2642,6 +2665,31 @@ function Dashboard() {
                                     : 'Check My PRs'}
                               </button>
                             </div>
+                            {(() => {
+                              const evalResult = evaluationResults[issue.id]
+                              if (!evalResult) return null
+                              return (
+                                <div className="eval-result">
+                                  <div className="eval-score">
+                                    <span className="eval-score-num">{evalResult.score}</span>
+                                    <span className="eval-score-label">/100</span>
+                                  </div>
+                                  <p className="eval-summary">{evalResult.summary}</p>
+                                  {evalResult.strengths?.length > 0 && (
+                                    <div className="eval-section">
+                                      <strong>Strengths</strong>
+                                      {evalResult.strengths.map((s: string, i: number) => <p key={i}>+ {s}</p>)}
+                                    </div>
+                                  )}
+                                  {evalResult.actionable_feedback?.length > 0 && (
+                                    <div className="eval-section">
+                                      <strong>Feedback</strong>
+                                      {evalResult.actionable_feedback.map((f: string, i: number) => <p key={i}>- {f}</p>)}
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            })()}
                           </div>
                         )
                       })}
