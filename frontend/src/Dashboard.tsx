@@ -1320,6 +1320,15 @@ function Dashboard() {
   const boostedBountyNetWorthUsd = isEthanDemoAccount
     ? Math.max(bountyNetWorthUsd, 248500)
     : bountyNetWorthUsd
+  const [welcomeDismissed, setWelcomeDismissed] = useState(
+    () => localStorage.getItem('gitty.user.welcomeDismissed') === 'true',
+  )
+  const isNewUser =
+    !loading &&
+    bookmarkedIssueIds.length === 0 &&
+    (data?.pullRequests?.length ?? 0) === 0 &&
+    bountiesSolvedCount === 0 &&
+    !welcomeDismissed
   const inferredProfileSkills = useMemo(() => {
     const inferred = new Set<string>(selectedSkills.slice(0, 8))
     const roleToken = selectedInterviewTrack.toLowerCase()
@@ -3332,6 +3341,78 @@ function Dashboard() {
                 </article>
               </section>
             </>
+          )}
+
+          {!loading && data && activeTab === 'profile' && isNewUser && (
+            <section className="dash-panel welcome-panel">
+              <h2>Welcome to Gitty, {settingsName.trim() || data.profile.name || data.profile.login}!</h2>
+              <p className="welcome-subtitle">
+                {localStorage.getItem('gitty.user.intent') === 'hired'
+                  ? "Let's build your profile to get hired."
+                  : "Let's get you started with your first open source contribution."}
+              </p>
+              <div className="welcome-checklist">
+                <div
+                  className="welcome-checklist-item"
+                  onClick={() => setActiveTab('practice')}
+                >
+                  <span className={`welcome-check${selectedSkills.length > 1 ? ' done' : ''}`}>
+                    {selectedSkills.length > 1 ? '✓' : ''}
+                  </span>
+                  <span className="welcome-checklist-label">Select your skills</span>
+                  <span className="welcome-arrow">→</span>
+                </div>
+                <div
+                  className="welcome-checklist-item"
+                  onClick={() => setActiveTab('practice')}
+                >
+                  <span className={`welcome-check${issues.length > 0 ? ' done' : ''}`}>
+                    {issues.length > 0 ? '✓' : ''}
+                  </span>
+                  <span className="welcome-checklist-label">Search for your first issue</span>
+                  <span className="welcome-arrow">→</span>
+                </div>
+                <div
+                  className="welcome-checklist-item"
+                  onClick={() => setActiveTab('practice')}
+                >
+                  <span className={`welcome-check${bookmarkedIssueIds.length > 0 ? ' done' : ''}`}>
+                    {bookmarkedIssueIds.length > 0 ? '✓' : ''}
+                  </span>
+                  <span className="welcome-checklist-label">Bookmark an issue</span>
+                  <span className="welcome-arrow">→</span>
+                </div>
+                <div className="welcome-checklist-item welcome-checklist-item-static">
+                  <span className={`welcome-check${(data.pullRequests?.length ?? 0) > 0 ? ' done' : ''}`}>
+                    {(data.pullRequests?.length ?? 0) > 0 ? '✓' : ''}
+                  </span>
+                  <span className="welcome-checklist-label">
+                    Open your first pull request
+                    <span className="welcome-guidance">Fork the repo, push a branch, and open a PR on GitHub</span>
+                  </span>
+                </div>
+                <div
+                  className="welcome-checklist-item"
+                  onClick={() => setActiveTab('interview')}
+                >
+                  <span className={`welcome-check${interviewView === 'scores' ? ' done' : ''}`}>
+                    {interviewView === 'scores' ? '✓' : ''}
+                  </span>
+                  <span className="welcome-checklist-label">Complete a practice interview</span>
+                  <span className="welcome-arrow">→</span>
+                </div>
+              </div>
+              <button
+                className="welcome-dismiss"
+                type="button"
+                onClick={() => {
+                  localStorage.setItem('gitty.user.welcomeDismissed', 'true')
+                  setWelcomeDismissed(true)
+                }}
+              >
+                Dismiss
+              </button>
+            </section>
           )}
 
           {!loading && data && activeTab === 'profile' && (
