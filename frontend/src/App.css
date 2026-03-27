@@ -3923,6 +3923,70 @@
   font-size: 13px;
 }
 
+/* ── Enriched empty states ─────────────────────────────── */
+
+.empty-state-rich {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 36px 24px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--glass-hi);
+  gap: 12px;
+}
+
+.empty-state-rich h3 {
+  margin: 0;
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.empty-state-rich p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+  max-width: 420px;
+  line-height: 1.5;
+}
+
+.empty-state-tips {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+  text-align: left;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.empty-state-tips li::before {
+  content: "→ ";
+  color: var(--orange);
+}
+
+.empty-state-steps {
+  text-align: left;
+  padding-left: 20px;
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.empty-state-steps li::marker {
+  color: var(--orange);
+  font-weight: 600;
+}
+
+.empty-state-rich .btn-cta {
+  padding: 8px 20px;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
 .interview-top {
   margin-top: 14px;
   display: grid;

@@ -2501,15 +2501,27 @@ function Dashboard() {
                   {!issueLoading &&
                     practiceIssueTab === 'suggested' &&
                     issues.length === 0 && (
-                    <div className="practice-grid-empty">
-                      Use filters above, then click Search Public GitHub Issues.
+                    <div className="empty-state-rich">
+                      <h3>Find your first issue</h3>
+                      <ul className="empty-state-tips">
+                        <li>Pick 1-2 skills you know from the filters above</li>
+                        <li>Try searching for "documentation" or "testing" — these are great starting points</li>
+                        <li>Look for issues with fewer comments — less competition</li>
+                      </ul>
+                      <button className="btn-cta" onClick={runIssueSearch} type="button">
+                        Search Issues
+                      </button>
                     </div>
                   )}
                   {!issueLoading &&
                     practiceIssueTab === 'bookmarked' &&
                     bookmarkedIssues.length === 0 && (
-                      <div className="practice-grid-empty">
-                        No bookmarked issues yet. Bookmark issues from the Suggested tab.
+                      <div className="empty-state-rich">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.45 }}>
+                          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                        </svg>
+                        <p>Bookmark issues you want to work on. They'll be saved here so you can come back to them.</p>
+                        <p className="dash-muted" style={{ fontSize: 13 }}>Tip: Start with issues labeled "documentation" or "testing" — they're beginner-friendly.</p>
                       </div>
                     )}
                 </div>
@@ -2646,8 +2658,12 @@ function Dashboard() {
                         )
                       })}
                       {interviewIssues.length === 0 && (
-                        <div className="practice-grid-empty">
-                          Start a session to get 3 role-matched random issues.
+                        <div className="empty-state-rich">
+                          <p>Practice interviews simulate a real coding challenge. You'll get 3 issues from a real company's repos and 30 minutes to open PRs.</p>
+                          <p className="dash-muted" style={{ fontSize: 13 }}>New to open source? Try the Practice tab first to find and bookmark issues at your own pace.</p>
+                          <button className="btn-cta" onClick={() => setActiveTab('practice')} type="button">
+                            Go to Practice
+                          </button>
                         </div>
                       )}
                     </div>
@@ -3489,11 +3505,18 @@ function Dashboard() {
                     )
                   })}
                   {profileShowcasePullRequests.length === 0 && (
-                    <div className="dashboard-list-item dashboard-list-static">
-                      <div>
-                        <strong>No pull requests found</strong>
-                        <span>Open PRs on GitHub and they will appear here.</span>
-                      </div>
+                    <div className="empty-state-rich">
+                      <p>You haven't opened any pull requests yet — that's okay!</p>
+                      <ol className="empty-state-steps">
+                        <li>Find an issue in the Practice tab</li>
+                        <li>Fork the repo on GitHub</li>
+                        <li>Make your changes and commit</li>
+                        <li>Open a pull request referencing the issue</li>
+                        <li>Come back here to see it!</li>
+                      </ol>
+                      <button className="btn-cta" onClick={() => setActiveTab('practice')} type="button">
+                        Find Issues
+                      </button>
                     </div>
                   )}
                 </div>
