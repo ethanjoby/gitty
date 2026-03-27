@@ -692,6 +692,7 @@ function Dashboard() {
   const [issues, setIssues] = useState<GitHubIssue[]>([])
   const [issueLoading, setIssueLoading] = useState(false)
   const [issueError, setIssueError] = useState<string | null>(null)
+  const [showGuide, setShowGuide] = useState(() => localStorage.getItem('gitty.user.guideCollapsed') !== 'true')
   const [bookmarkedIssueIds, setBookmarkedIssueIds] = useState<number[]>([])
   const [bookmarkedIssues, setBookmarkedIssues] = useState<GitHubIssue[]>([])
   const [linkedInUrl, setLinkedInUrl] = useState('')
@@ -2241,6 +2242,54 @@ function Dashboard() {
 
           {!loading && activeTab === 'practice' && (
             <>
+              {showGuide && bookmarkedIssueIds.length === 0 && (
+                <div className="guide-panel">
+                  <div className="guide-header">
+                    <h3 style={{ fontFamily: 'Fraunces, serif', margin: 0 }}>How to Contribute to Open Source</h3>
+                    <button className="guide-dismiss" onClick={() => { setShowGuide(false); localStorage.setItem('gitty.user.guideCollapsed', 'true') }}>
+                      Got it, hide this
+                    </button>
+                  </div>
+                  <div className="guide-steps">
+                    <div className="guide-step">
+                      <div className="guide-step-num">1</div>
+                      <div>
+                        <strong>Find an issue</strong>
+                        <p>Browse open issues in projects that use tech you know. Look for clear descriptions and active maintainers.</p>
+                      </div>
+                    </div>
+                    <div className="guide-step">
+                      <div className="guide-step-num">2</div>
+                      <div>
+                        <strong>Fork the repository</strong>
+                        <p>Click "Fork" on GitHub to create your own copy. Clone it locally to your machine.</p>
+                      </div>
+                    </div>
+                    <div className="guide-step">
+                      <div className="guide-step-num">3</div>
+                      <div>
+                        <strong>Make your changes</strong>
+                        <p>Create a branch, write your code, and commit with a clear message describing what you changed.</p>
+                      </div>
+                    </div>
+                    <div className="guide-step">
+                      <div className="guide-step-num">4</div>
+                      <div>
+                        <strong>Open a pull request</strong>
+                        <p>Push your branch and open a PR that references the issue number (e.g., "Fixes #123").</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="guide-tips">
+                    <p><strong>Tips:</strong></p>
+                    <ul>
+                      <li>Start with documentation or test fixes — they're low-risk and maintainers appreciate them</li>
+                      <li>Read the project's CONTRIBUTING.md before starting</li>
+                      <li>Keep PRs small and focused on one change</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
               <section className="dash-panel">
                 <h2>Practice Questions</h2>
                 <p className="dash-muted">
