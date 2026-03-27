@@ -4943,6 +4943,21 @@ select.interview-pr-input option,
   font-weight: 600;
 }
 
+.eval-result {
+  background: var(--glass-hi);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 12px;
+}
+.eval-score { display: flex; align-items: baseline; gap: 2px; margin-bottom: 8px; }
+.eval-score-num { font-size: 28px; font-weight: 700; color: var(--orange); font-family: 'JetBrains Mono', monospace; }
+.eval-score-label { font-size: 14px; color: var(--muted); }
+.eval-summary { color: var(--ink); font-size: 14px; line-height: 1.5; margin: 0 0 12px; }
+.eval-section { margin-top: 10px; }
+.eval-section strong { display: block; font-size: 13px; color: var(--ink); margin-bottom: 4px; }
+.eval-section p { margin: 2px 0; font-size: 13px; color: var(--muted); }
+
 .company-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

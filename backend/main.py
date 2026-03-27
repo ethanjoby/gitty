@@ -8,6 +8,7 @@ from typing import Any
 import httpx
 from anthropic import AsyncAnthropic
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, HttpUrl
 from playwright.async_api import async_playwright
 from dotenv import load_dotenv
@@ -15,6 +16,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = FastAPI(title="PR Quality Evaluator", version="1.0.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 GITHUB_API = "https://api.github.com"
 
