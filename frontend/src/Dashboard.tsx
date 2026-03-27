@@ -709,6 +709,7 @@ function Dashboard() {
   const [sessionCheckedBountyIds, setSessionCheckedBountyIds] = useState<string[]>([])
   const [uiToasts, setUiToasts] = useState<UiToast[]>([])
   const bountyEntryToastsShownRef = useRef(false)
+  const autoSearchFiredRef = useRef(false)
   const [hiredStep, setHiredStep] = useState<HiredStep>('browse')
   const [selectedHiredCompany, setSelectedHiredCompany] = useState<HiredCompany | null>(null)
   const [selectedInterviewTrack, setSelectedInterviewTrack] = useState('Full Stack Engineer')
@@ -818,6 +819,17 @@ function Dashboard() {
         if (Array.isArray(parsed)) setBookmarkedIssues(parsed)
       } catch {
         /* ignore invalid local storage */
+      }
+    }
+    const savedSkills = localStorage.getItem('gitty.user.skills')
+    if (savedSkills) {
+      try {
+        const parsed = JSON.parse(savedSkills) as string[]
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSelectedSkills(parsed.filter((s) => SKILLS.includes(s)))
+        }
+      } catch {
+        /* ignore */
       }
     }
   }, [])
@@ -1544,9 +1556,11 @@ function Dashboard() {
   }
 
   const toggleSkill = (skill: string) => {
-    setSelectedSkills((prev) =>
-      prev.includes(skill) ? prev.filter((item) => item !== skill) : [...prev, skill],
-    )
+    setSelectedSkills((prev) => {
+      const next = prev.includes(skill) ? prev.filter((item) => item !== skill) : [...prev, skill]
+      localStorage.setItem('gitty.user.skills', JSON.stringify(next))
+      return next
+    })
   }
 
   const runIssueSearch = async () => {
@@ -1628,6 +1642,20 @@ function Dashboard() {
       setIssueLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (
+      activeTab === 'practice' &&
+      issues.length === 0 &&
+      selectedSkills.length > 0 &&
+      !issueLoading &&
+      !autoSearchFiredRef.current
+    ) {
+      autoSearchFiredRef.current = true
+      runIssueSearch()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, issues.length, selectedSkills.length, issueLoading])
 
   useEffect(() => {
     if (suggestedPage > suggestedTotalPages) setSuggestedPage(suggestedTotalPages)
