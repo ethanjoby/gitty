@@ -4950,3 +4950,54 @@ select.interview-pr-input option,
   margin-top: 12px;
 }
 
+.milestone-track {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 16px;
+  margin: 16px 0;
+  background: var(--glass);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.milestone-node-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 80px;
+}
+.milestone-node {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--line-hi);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-2);
+  transition: all 0.3s ease;
+  color: var(--ink);
+}
+.milestone-node-done {
+  background: var(--orange);
+  border-color: var(--orange);
+  box-shadow: 0 0 12px rgba(255, 85, 0, 0.3);
+}
+.milestone-line {
+  flex: 1;
+  height: 2px;
+  background: var(--line);
+  margin-top: 14px;
+  min-width: 20px;
+}
+.milestone-line-done {
+  background: var(--orange);
+}
+.milestone-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  max-width: 90px;
+}
+

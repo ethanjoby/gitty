@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { signOut } from 'firebase/auth'
 import type { User } from 'firebase/auth'
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -1355,6 +1355,15 @@ function Dashboard() {
     }
     return Array.from(inferred).slice(0, 12)
   }, [selectedSkills, selectedInterviewTrack, data])
+
+  const milestones = useMemo(() => [
+    { label: 'Selected Skills', done: selectedSkills.length > 0 },
+    { label: 'Searched Issues', done: issues.length > 0 },
+    { label: 'Bookmarked First Issue', done: bookmarkedIssueIds.length > 0 },
+    { label: 'Opened First PR', done: (data?.pullRequests?.length ?? 0) > 0 },
+    { label: 'Practice Interview', done: false },
+    { label: 'First Bounty', done: bountiesSolvedCount > 0 },
+  ], [selectedSkills, issues, bookmarkedIssueIds, data, bountiesSolvedCount])
 
   const profileShowcasePullRequests = useMemo(() => {
     if (!data) return []
@@ -3524,6 +3533,23 @@ function Dashboard() {
                     <span>Net Worth From Bounties</span>
                     <strong>${animatedBountyNetWorthUsd.toLocaleString()}</strong>
                   </div>
+                </div>
+                <div className="milestone-track">
+                  {milestones.map((m, i) => (
+                    <Fragment key={m.label}>
+                      {i > 0 && <div className={`milestone-line${milestones[i - 1].done ? ' milestone-line-done' : ''}`} />}
+                      <div className="milestone-node-wrapper">
+                        <div className={`milestone-node${m.done ? ' milestone-node-done' : ''}`}>
+                          {m.done && (
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          )}
+                        </div>
+                        <span className="milestone-label">{m.label}</span>
+                      </div>
+                    </Fragment>
+                  ))}
                 </div>
                 <div className="dash-settings-grid">
                   <div>
