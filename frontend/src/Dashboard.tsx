@@ -1629,6 +1629,35 @@ function Dashboard() {
     }
   }
 
+  const runQuickStartSearch = async () => {
+    setIssueLoading(true)
+    setIssueError(null)
+    const token = localStorage.getItem('gitty.github.token')
+    const skillQuery =
+      selectedSkills.length > 0
+        ? `(${selectedSkills.slice(0, 3).map((s) => `"${s}"`).join(' OR ')})`
+        : '"React" OR "TypeScript" OR "Python"'
+    const query = encodeURIComponent(
+      ['is:issue', 'is:open', 'archived:false', 'label:"good first issue"', skillQuery].join(' '),
+    )
+    try {
+      const headers: Record<string, string> = { Accept: 'application/vnd.github+json' }
+      if (token) headers.Authorization = `Bearer ${token}`
+      const response = await fetch(
+        `https://api.github.com/search/issues?q=${query}&sort=comments&order=desc&per_page=100`,
+        { headers },
+      )
+      if (!response.ok) throw new Error(`Search failed (${response.status})`)
+      const payload = await response.json()
+      setIssues(payload.items ?? [])
+      setSuggestedPage(1)
+    } catch (err) {
+      setIssueError(err instanceof Error ? err.message : 'Quick start search failed.')
+    } finally {
+      setIssueLoading(false)
+    }
+  }
+
   useEffect(() => {
     if (suggestedPage > suggestedTotalPages) setSuggestedPage(suggestedTotalPages)
   }, [suggestedPage, suggestedTotalPages])
@@ -2265,6 +2294,16 @@ function Dashboard() {
                   </article>
                 </div>
               </section>
+
+              <div className="quick-start-panel">
+                <h3 style={{ fontFamily: 'Fraunces, serif', margin: '0 0 6px' }}>New to open source?</h3>
+                <p style={{ color: 'var(--muted)', margin: '0 0 14px', fontSize: '14px' }}>
+                  We'll find beginner-friendly issues labeled "good first issue" matched to your skills.
+                </p>
+                <button className="btn-cta" onClick={runQuickStartSearch} disabled={issueLoading}>
+                  {issueLoading ? 'Searching...' : 'Find Beginner Issues'}
+                </button>
+              </div>
 
               <section className="dash-panel">
                 <h2>Find Practice Issues</h2>

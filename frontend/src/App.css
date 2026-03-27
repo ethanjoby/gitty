@@ -1609,6 +1609,15 @@
   align-content: start;
 }
 
+.quick-start-panel {
+  background: var(--glass-hi);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--orange);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
 .dash-panel {
   border: 1px solid var(--line);
   border-radius: 14px;
